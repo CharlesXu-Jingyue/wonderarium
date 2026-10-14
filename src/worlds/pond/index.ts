@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import { glassHit, Look, mesh, rand, seeded } from '../kit';
 import type { World, WorldContext, WorldPointerEvent } from '../world';
+import { NavGrid } from '../nav';
+import { Deer } from './deer';
 import { Dragonfly } from './dragonfly';
 import { Drift } from './drift';
 import { Effects } from './effects';
@@ -54,7 +56,7 @@ const STONES: StoneSpec[] = [
   { at: [-0.335, WATER - 0.014, 0.0], size: [0.028, 0.024, 0.032] },
   { at: [-0.05, WATER - 0.012, 0.2], size: [0.04, 0.03, 0.036], moss: 0.8 },
   { at: g(0.34, 0.37), size: [0.05, 0.045, 0.045] },
-  { at: g(0.43, -0.04), size: [0.04, 0.045, 0.04] },
+  { at: g(0.45, -0.42), size: [0.045, 0.05, 0.045] },
   { at: g(-0.3, 0.36), size: [0.06, 0.05, 0.05] },
   { at: g(0.02, 0.43), size: [0.035, 0.03, 0.04] },
   { at: g(-0.21, -0.29), size: [0.045, 0.04, 0.04] },
@@ -111,6 +113,9 @@ export class ForestPond implements World {
   private koi: Koi[] = [];
   private frog!: Frog;
   private dragonfly!: Dragonfly;
+  private deer!: Deer;
+  /** Where a deer can walk: dry ground clear of rocks, trunks and the log. */
+  private nav!: NavGrid;
   private drift!: Drift;
   private fx!: Effects;
   private perches: Perch[] = [];
@@ -279,6 +284,33 @@ export class ForestPond implements World {
     root.add(this.frog.root);
     this.dragonfly = new Dragonfly(look, new THREE.Vector3(0.1, WATER + 0.1, 0.1));
     root.add(this.dragonfly.root);
+
+    // A fawn that visits now and then, finding its way around the pond.
+    const blocks: THREE.Vector3[] = [
+      ...STONES.map((s) => new THREE.Vector3(s.at[0], s.at[2], Math.max(s.size[0], s.size[2]))),
+      new THREE.Vector3(CLEFT.x, CLEFT.z, 0.14),
+      ...this.trees.map((t) => new THREE.Vector3(t.group.position.x, t.group.position.z, t.leafy ? 0.05 : 0.03)),
+      // Cattails stand at the water's edge; a deer may brush their outer reeds.
+      ...this.cattails.map((c) => new THREE.Vector3(c.group.position.x, c.group.position.z, 0.012)),
+    ];
+    const logA = LOG.a;
+    const logB = LOG.b;
+    this.nav = new NavGrid(0.46, 0.02, (p) => {
+      if (pondSdf(p.x, p.y) < 0.04) return false;
+      const margin = 0.035;
+      if (blocks.some((b) => Math.hypot(p.x - b.x, p.y - b.y) < b.z + margin)) return false;
+      const ab = new THREE.Vector2().subVectors(logB, logA);
+      const k = THREE.MathUtils.clamp(new THREE.Vector2().subVectors(p, logA).dot(ab) / ab.lengthSq(), 0, 1);
+      return p.distanceTo(logA.clone().addScaledVector(ab, k)) > LOG.r + margin;
+    });
+    this.nav.rebuild();
+    this.deer = new Deer(look, {
+      nav: this.nav,
+      ripple: (x, z, s) => this.water.ripple(x, z, s),
+      daylight: () => this.ctx.light.daylight,
+      viewer: () => this.viewer,
+    });
+    root.add(this.deer.root);
   }
 
   /** Height of the first surface straight below (x, 1, z) among these objects. */
@@ -334,6 +366,7 @@ export class ForestPond implements World {
     const pond = this.pond;
     for (const k of this.koi) k.step(dt, pond, this.koi);
     this.frog.step(dt, this.frogWorld);
+    this.deer.step(dt);
     this.dragonfly.step(dt, {
       perches: () => this.cattails.flatMap((c) => c.perches()),
       ripple: (x, z, s) => this.water.ripple(x, z, s),
@@ -437,6 +470,11 @@ export class ForestPond implements World {
     return this.raycaster.intersectObjects(objects, true)[0] ?? null;
   }
 
+  /** The deer, for picking, but only while it is inside the glass. */
+  private get deerIfHere() {
+    return this.deer.here ? [this.deer.root] : [];
+  }
+
   private ownerTree(o: THREE.Object3D) {
     return this.trees.find((t) => within(o, t.group));
   }
@@ -445,18 +483,19 @@ export class ForestPond implements World {
     this.viewer.set(e.ray.origin.x, e.ray.origin.z);
     switch (e.kind) {
       case 'hover': {
-        const h = this.hit(e.ray, [this.frog.root, ...this.trees.map((t) => t.group)]);
-        const onFrog = !!h && !this.ownerTree(h.object);
-        this.frog.watched = onFrog;
+        const h = this.hit(e.ray, [this.frog.root, ...this.trees.map((t) => t.group), ...this.deerIfHere]);
+        this.frog.watched = !!h && within(h.object, this.frog.root);
+        this.deer.watched = !!h && within(h.object, this.deer.root);
         this.cursor = h ? 'pointer' : '';
         return false;
       }
       case 'leave':
         this.frog.watched = false;
+        this.deer.watched = false;
         this.cursor = '';
         return false;
       case 'click': {
-        const solid = [this.frog.root, ...this.trees.map((t) => t.group), this.terrain, this.stones, ...this.pads.map((p) => p.group)];
+        const solid = [this.frog.root, ...this.deerIfHere, ...this.trees.map((t) => t.group), this.terrain, this.stones, ...this.pads.map((p) => p.group)];
         const h = this.hit(e.ray, solid);
         const surface = e.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0, 1, 0), -WATER), new THREE.Vector3());
         const wet = surface && pondSdf(surface.x, surface.z) < 0 && (!h || surface.distanceTo(e.ray.origin) <= h.distance + 0.001);
@@ -473,6 +512,10 @@ export class ForestPond implements World {
             this.drift.shed(tree, 3 + Math.floor(Math.random() * 3));
             return true;
           }
+          if (within(h.object, this.deer.root)) {
+            this.deer.poke();
+            return true;
+          }
           if (within(h.object, this.frog.root)) {
             this.frog.poke();
             return true;
@@ -485,6 +528,7 @@ export class ForestPond implements World {
         const from = new THREE.Vector2(glass.at.x, glass.at.z);
         for (const k of this.koi) k.startle(from);
         this.frog.startle(this.frogWorld);
+        this.deer.startle();
         this.dragonfly.scare();
         return true;
       }

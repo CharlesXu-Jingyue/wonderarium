@@ -3,7 +3,7 @@ import { glassHit } from '../kit';
 import type { World, WorldContext, WorldPointerEvent } from '../world';
 import { HOLD, Hamster, type Cage, type HamsterSave, type Treat } from './brain';
 import { Effects } from './effects';
-import { NavGrid } from './nav';
+import { NavGrid } from '../nav';
 import { C, Look, rand } from './look';
 import {
   Bottle, Bowl, buildBedding, buildTray, Cheese, Furniture, GROUND, HAMSTER_R, House, Log, ROAM, TRAY, Wheel,
@@ -76,7 +76,7 @@ export class HamsterCage implements World {
   private drag: Drag | null = null;
   private readonly viewer = new THREE.Vector2(2, 2);
   private readonly raycaster = new THREE.Raycaster();
-  private readonly nav = new NavGrid((p, margin) => this.isFree(p, margin));
+  private readonly nav = new NavGrid(ROAM, 0.02, (p) => this.isFree(p, HAMSTER_R));
 
   mount(ctx: WorldContext, raw?: unknown) {
     this.ctx = ctx;

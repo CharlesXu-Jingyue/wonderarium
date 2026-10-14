@@ -1,39 +1,54 @@
 import * as THREE from 'three';
-import { HAMSTER_R, ROAM } from './scenery';
 
-// Where the hamster's body fits, as a coarse grid over the bedding, and the
-// routes between places. Rebuilt whenever furniture moves.
-
-const STEP = 0.02;
-const N = Math.floor((2 * ROAM) / STEP) + 1;
+// Where a creature's body fits, as a coarse square grid over the floor of a
+// world (x and z within ±extent), and the routes between places: a
+// breadth-first search pulled taut into straight runs. Rebuilt whenever
+// the obstacles move.
 
 export class NavGrid {
   /** Bumped on every rebuild, so routes know when to refresh. */
   version = 0;
-  private readonly open = new Uint8Array(N * N);
+  private readonly n: number;
+  private readonly open: Uint8Array;
 
-  constructor(private readonly isFree: (p: THREE.Vector2, margin: number) => boolean) {}
+  constructor(
+    private readonly extent: number,
+    private readonly step: number,
+    /** Can the creature's centre stand here? */
+    private readonly isFree: (p: THREE.Vector2) => boolean,
+  ) {
+    this.n = Math.floor((2 * extent) / step) + 1;
+    this.open = new Uint8Array(this.n * this.n);
+  }
 
   rebuild() {
     const p = new THREE.Vector2();
+    const N = this.n;
     for (let i = 0; i < N; i++) {
-      for (let j = 0; j < N; j++) this.open[i * N + j] = this.isFree(this.center(i, j, p), HAMSTER_R) ? 1 : 0;
+      for (let j = 0; j < N; j++) this.open[i * N + j] = this.isFree(this.center(i, j, p)) ? 1 : 0;
     }
     this.version++;
   }
 
+  /** Is the cell nearest p open? */
+  free(p: THREE.Vector2) {
+    return this.open[this.cell(p)] === 1;
+  }
+
   private center(i: number, j: number, out = new THREE.Vector2()) {
-    return out.set(-ROAM + i * STEP, -ROAM + j * STEP);
+    return out.set(-this.extent + i * this.step, -this.extent + j * this.step);
   }
 
   private cell(p: THREE.Vector2): number {
-    const i = THREE.MathUtils.clamp(Math.round((p.x + ROAM) / STEP), 0, N - 1);
-    const j = THREE.MathUtils.clamp(Math.round((p.y + ROAM) / STEP), 0, N - 1);
+    const N = this.n;
+    const i = THREE.MathUtils.clamp(Math.round((p.x + this.extent) / this.step), 0, N - 1);
+    const j = THREE.MathUtils.clamp(Math.round((p.y + this.extent) / this.step), 0, N - 1);
     return i * N + j;
   }
 
   /** The open cell nearest to p, searching outward a little. */
   private openNear(p: THREE.Vector2): number {
+    const N = this.n;
     const c = this.cell(p);
     if (this.open[c]) return c;
     const ci = Math.floor(c / N);
@@ -60,6 +75,7 @@ export class NavGrid {
 
   /** Breadth-first search; returns the parent array (-1 unvisited, self for start). */
   private search(start: number, goal = -1) {
+    const N = this.n;
     const parent = new Int32Array(N * N).fill(-1);
     const queue = new Int32Array(N * N);
     let head = 0;
@@ -100,7 +116,7 @@ export class NavGrid {
   /** Is the straight line between a and b clear for the hamster? */
   private clear(a: THREE.Vector2, b: THREE.Vector2) {
     const d = a.distanceTo(b);
-    const steps = Math.ceil(d / (STEP * 0.75));
+    const steps = Math.ceil(d / (this.step * 0.75));
     const p = new THREE.Vector2();
     for (let k = 1; k < steps; k++) {
       if (!this.open[this.cell(p.lerpVectors(a, b, k / steps))]) return false;
@@ -110,6 +126,7 @@ export class NavGrid {
 
   /** A route of waypoints from `from` to `to`, or null if there is none. */
   route(from: THREE.Vector2, to: THREE.Vector2): THREE.Vector2[] | null {
+    const N = this.n;
     const start = this.openNear(from);
     const goal = this.openNear(to);
     if (start < 0 || goal < 0) return null;

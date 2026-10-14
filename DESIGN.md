@@ -148,14 +148,29 @@ toward evening. Leaves let go of the big tree and spin down onto the grass
 or float for a while. Fireflies come out at dusk; motes of dust turn in the
 daylight. Grass, ferns, reeds and trees all lean in one unhurried breeze.
 
+**The fawn:** a small spotted deer visits now and then, more often around
+dawn and dusk, stepping in through one of the glass walls (the box cuts it
+off until it is inside) and leaving through another. There is no routine:
+each time it finishes something it draws its next move by lot, weighted
+loosely (a drink if it has not had one, a nibble of grass, a stroll, a
+moment standing still to look about, a lie-down, or home, likelier the
+longer it has stayed), and it sometimes stops mid-walk to look around. It
+finds its way on a grid of dry ground clear of rocks, trunks and the log,
+the same kind the hamster uses, and only enters where it can reach the
+water. To drink it lowers its head just until its muzzle meets the
+surface, found by trying the pose rather than chasing it.
+
 **Interactions:**
 - *Feed the koi.* Click the water: a pinch of food scatters on the surface
   and the koi come up for it.
 - *Shake a tree.* Click one: it sways, and the leafy one drops a few leaves.
 - *The frog.* Rest the pointer on it and it turns to look at you; click it
   and it croaks, or decides it is time to move.
+- *The fawn.* Rest the pointer on it, or click it, and it lifts its head
+  and looks your way, ears and tail flicking.
 - *Tap the glass.* Click anywhere else (grass, stone, air): a ripple on the
-  pane, the koi scatter, the frog dives, the dragonfly darts away. The floor
+  pane, the koi scatter, the frog dives, the dragonfly darts away, and the fawn
+  bounds out of the box. The floor
   fills the cube here, so a line of sight almost always ends on the ground;
   only the water, the trees and the frog answer a click themselves.
 
