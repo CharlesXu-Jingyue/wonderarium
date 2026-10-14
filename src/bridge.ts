@@ -78,10 +78,10 @@ function browserBridge(): Bridge {
       async save(bytes) {
         // In a browser, hand the picture over as a download instead.
         const url = URL.createObjectURL(new Blob([bytes as BlobPart], { type: 'image/png' }));
-        const a = Object.assign(document.createElement('a'), { href: url, download: 'world.png' });
+        const a = Object.assign(document.createElement('a'), { href: url, download: 'wonderarium.png' });
         a.click();
         URL.revokeObjectURL(url);
-        return 'world.png';
+        return 'wonderarium.png';
       },
       openFolder() {},
     },

@@ -2,6 +2,7 @@
   "name": "wonderarium",
   "version": "0.0.0",
   "private": true,
+  "license": "MIT",
   "description": "Wonderarium: a small glass cube on the desktop with a living world inside.",
   "type": "module",
   "main": "electron/main.mjs",

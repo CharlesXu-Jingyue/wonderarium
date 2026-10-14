@@ -27,7 +27,11 @@ function disposeTree(root: THREE.Object3D) {
 }
 
 async function start() {
-  if (!inElectron) document.body.classList.add('browser');
+  if (!inElectron) {
+    // In a browser tab the window can't be dragged or closed; see styles.css.
+    document.body.classList.add('browser');
+    document.getElementById('topbar')?.removeAttribute('title');
+  }
   const save = await loadSave();
   save.worlds ??= {};
   save.thumbs ??= {};

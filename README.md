@@ -2,6 +2,8 @@
 
 A small glass cube sits on your desktop, and inside it a tiny world goes about its business. Part terrarium, part aquarium, part cabinet of small wonders: hence the name. Nothing in it needs you. A hamster runs its wheel at midnight and sleeps off the afternoon; a spring spills from a cleft in the rocks into a pond where koi drift under the lily pads. You can lean in and play, or leave it in a corner of the screen and glance at it now and then, the way you might at a window.
 
+**[Try it in your browser](https://charlesxu-jingyue.github.io/wonderarium/)**, where it lives in a tab, or run the desktop version on a Mac (below), where it floats on your desktop as it was meant to.
+
 ![The forest pond in its glass cube, with the worlds panel, the clock and the tools showing](docs/images/forest-pond.jpg)
 
 The cube is only ever a boundary. It has no base or furniture of its own: whatever a world holds is inside the glass, and anything that grows past it (a tall pine, a wide rock) is simply cut off there, like a diorama. The design notes in [DESIGN.md](DESIGN.md) tell the longer story of how each world was made.
@@ -79,7 +81,7 @@ You need macOS, Git and Node 24. If you have them already, skip to step 3.
 
    `nvm install` fetches and switches to Node 24 (skip it if you used Homebrew). `npm ci` installs exactly the versions in the lockfile, into the project's own `node_modules`.
 
-   The repository is private for now, so cloning needs a GitHub account that has been given access. If you have SSH keys set up with GitHub, `git clone git@github.com:CharlesXu-Jingyue/wonderarium.git` works as well.
+   If you have SSH keys set up with GitHub, `git clone git@github.com:CharlesXu-Jingyue/wonderarium.git` works as well.
 
 4. **Open the box.**
 
@@ -106,6 +108,8 @@ npm run dev
 ```
 
 This is the development loop. Vite rebuilds into `dist/renderer` whenever a file changes and the window reloads itself; changes under `electron/` need a restart. There is no dev server, so nothing listens on a port. `npm run typecheck` checks the TypeScript, and `npm run preview` serves the built page to an ordinary browser, where it falls back to `localStorage` and a stand-in wallpaper so you can judge the look without the desktop behind it.
+
+The web version is the same page, built and published to GitHub Pages by `.github/workflows/pages.yml` on every push to `main`. In a browser tab it saves to the browser's own storage, offers screenshots as downloads, uses the browser's fullscreen, and quietly hides the controls that only make sense for a desktop window.
 
 The code is small and plainly laid out:
 
@@ -134,3 +138,7 @@ ELECTRON_GET_USE_PROXY=1 GLOBAL_AGENT_HTTPS_PROXY="$HTTPS_PROXY" node node_modul
 ```
 
 The window itself cannot open from inside the sandbox, which refuses the system services a native window needs, so `npm start` and `npm run dev` are run either by you or by Claude with an explicit, per-command exception.
+
+## Licence
+
+Wonderarium is released under the [MIT licence](LICENSE): use it, change it and share it as you like, keeping the copyright notice.

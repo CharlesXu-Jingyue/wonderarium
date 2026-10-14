@@ -36,9 +36,43 @@ body.fullscreen #app {
   transition: background 2s;
 }
 
-/* Outside Electron there is no desktop behind the page, so pretend. */
-body.browser {
-  background: radial-gradient(circle at 50% 30%, #c9b8a8, #a89585 80%);
+/* In a browser tab there is no desktop behind the box either, so it gets
+   the same sky-following backdrop as fullscreen, and the controls that only
+   make sense for a desktop window step aside. */
+body.browser #app {
+  background: linear-gradient(180deg, var(--backdrop-top), var(--backdrop-bottom));
+  transition: background 2s;
+}
+
+body.browser #min-btn,
+body.browser #close-btn,
+body.browser .resize,
+body.browser #shots-folder,
+body.browser .toggle:has(#pin-toggle) {
+  display: none;
+}
+
+/* A quiet way back to the project, shown only on the web. */
+.about {
+  display: none;
+}
+
+body.browser .about {
+  display: block;
+  position: absolute;
+  left: 12px;
+  bottom: 14px;
+  padding: 6px 11px;
+  border-radius: 999px;
+  background: var(--card);
+  box-shadow: var(--shadow);
+  color: var(--ink);
+  font-size: 12px;
+  text-decoration: none;
+}
+
+body.browser .about:hover {
+  color: var(--accent);
 }
 
 #stage {
@@ -429,4 +463,44 @@ body.fullscreen .topbar {
 
 body.fullscreen .resize {
   display: none;
+}
+
+/* ---------- narrow screens (a phone, on the web) ---------- */
+
+/* The cube fills the width, so the worlds become a row of cards under the
+   clock, and the link to the project moves up to the opposite corner. */
+@media (max-width: 600px) {
+  .worlds {
+    left: 50%;
+    top: 68px;
+    transform: translateX(-50%);
+    width: auto;
+    max-width: calc(100% - 24px);
+    padding: 8px;
+  }
+
+  .worlds header {
+    display: none;
+  }
+
+  .world-list {
+    flex-direction: row;
+    overflow: visible;
+  }
+
+  .world-card {
+    width: 96px;
+    flex: none;
+  }
+
+  .world-card.soon {
+    width: 44px;
+    display: grid;
+    place-items: center;
+  }
+
+  body.browser .about {
+    top: 18px;
+    bottom: auto;
+  }
 }

@@ -101,9 +101,15 @@ export class Stage {
       out.getContext('2d')!.drawImage(src, 0, 0);
       return out;
     }
-    // Crop around the cube, which is centred and fills most of the height.
-    const sh = src.height * crop.scale;
-    const sw = sh * (crop.width / crop.height);
+    // Crop around the cube, which is centred and fills the shorter side
+    // (the height in a landscape window, the width on a phone).
+    const aspect = crop.width / crop.height;
+    let sh = src.height * crop.scale;
+    let sw = sh * aspect;
+    if (sw > src.width * crop.scale) {
+      sw = src.width * crop.scale;
+      sh = sw / aspect;
+    }
     out.width = crop.width;
     out.height = crop.height;
     out.getContext('2d')!.drawImage(src, (src.width - sw) / 2, (src.height - sh) / 2, sw, sh, 0, 0, crop.width, crop.height);
