@@ -12,6 +12,8 @@ const FIT_RADIUS = 0.98; // cube corners plus a little room for its shadow
 const IDLE_BEFORE_DRIFT = 45; // seconds without input before the slow orbit
 const HOME_POLAR = 1.08;
 const HOME_AZIMUTH = Math.PI / 4;
+/** Where the glass cuts off anything that grows past it. */
+const WALL = 0.497;
 
 export class Stage {
   readonly renderer: THREE.WebGLRenderer;
@@ -34,6 +36,12 @@ export class Stage {
   private worldHasPress = false;
   private readonly raycaster = new THREE.Raycaster();
   private readonly ndc = new THREE.Vector2();
+  // Six planes facing inward: the cube is the edge of every world, so a tree
+  // too tall or a rock too wide is simply cut off at the glass.
+  private readonly walls = [
+    [1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1],
+  ].map(([x, y, z]) => new THREE.Plane(new THREE.Vector3(x, y, z), WALL));
+  private readonly walled = new WeakSet<THREE.Material>();
 
   constructor(private readonly canvas: HTMLCanvasElement) {
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'low-power' });
@@ -102,6 +110,20 @@ export class Stage {
     // Draw the frame again as usual, or the opaque one would be shown.
     if (crop.background) this.renderer.render(this.scene, this.camera);
     return out;
+  }
+
+  /** Give every material in the world the cube's walls (once each, new ones as they appear). */
+  private wallIn() {
+    this.worldRoot.traverse((o) => {
+      const material = (o as THREE.Mesh).material;
+      if (!material) return;
+      for (const m of [material].flat()) {
+        if (this.walled.has(m) || m instanceof THREE.ShaderMaterial) continue;
+        this.walled.add(m);
+        m.clippingPlanes = [...(m.clippingPlanes ?? []), ...this.walls];
+        m.clipShadows = true;
+      }
+    });
   }
 
   wake() {
@@ -197,6 +219,7 @@ export class Stage {
     const turn = Math.atan2(offset.x, offset.z) - HOME_AZIMUTH;
     this.lighting.update(hours, turn);
     this.cube.update(this.lighting.state);
+    this.wallIn();
     this.renderer.render(this.scene, this.camera);
   }
 }

@@ -1,5 +1,6 @@
 import { palette } from '../palette';
 import { HamsterCage } from './hamster';
+import { ForestPond } from './pond';
 import type { World } from './world';
 
 // Every world the box can hold. Adding one is a new folder and a line here.
@@ -14,4 +15,5 @@ export interface WorldEntry {
 
 export const WORLDS: WorldEntry[] = [
   { id: 'hamster-cage', name: 'Hamster Cage', accent: palette.peach, create: () => new HamsterCage() },
+  { id: 'forest-pond', name: 'Forest Pond', accent: palette.sage, create: () => new ForestPond() },
 ];

@@ -34,7 +34,7 @@ self-sustaining world inside. You watch it more than you play it.
 ## Shell
 
 - **Chrome.** Hidden until you hover. Then four things fade in: a Worlds panel on the left with a picture card per world; a pill at the top right with the sky icon, the box's time (click it for shift, speed and sync) and minimize, fullscreen and close (drag the pill to move the window); round tools along the bottom (reset view, pause, screenshot, settings); and a resize corner. Settings holds keep-on-top, drift-when-idle and the screenshots folder.
-- **Cube.** Only the boundary: faintly blue glass that looks thick at the edges (a soft bluish rim and a crisp highlight line), brighter at grazing angles (Fresnel), and it mirrors two sparse room lights (a tall window and a small warm lamp, fixed relative to the viewer), so reflections slide across the panes as the cube turns. It has no base or contents of its own. A soft contact shadow under it makes it seem to rest on the desktop.
+- **Cube.** Only the boundary: faintly blue glass that looks thick at the edges (a soft bluish rim and a crisp highlight line), brighter at grazing angles (Fresnel), and it mirrors two sparse room lights (a tall window and a small warm lamp, fixed relative to the viewer), so reflections slide across the panes as the cube turns. It has no base or contents of its own, but it is the edge of every world: whatever grows past the glass (a tall pine, a wide rock) is cut off there, shadow and all, like a diorama. A soft contact shadow under it makes it seem to rest on the desktop.
 - **Lighting.** A sun or moon light whose angle and colour follow the world clock: warm and low at dawn and dusk, lavender at night, never black. The light belongs to the room, not the cube: turning the cube turns it under a fixed light, so shadows sweep across the contents (only turning around the vertical axis counts; the cube never tips). A tiny warm glow from the hamster house at night is planned.
 - **Runtime.** Fixed-step simulation, decoupled from rendering. It keeps running
   when the window is unfocused and throttles or pauses when the window is hidden.
@@ -108,6 +108,58 @@ segments, and is pushed out of furniture if it ever overlaps.
 **No upkeep:** the bowl and bottle never run out. Hunger and thirst still
 drive it to eat and drink, which is part of the fun to watch, but they can
 never become a problem. Food you drop is an extra treat, not a necessity.
+
+## Forest pond (world #2)
+
+Code: `src/worlds/pond/` (terrain, water, plants, koi, frog, dragonfly,
+drift, effects, index). Shared helpers for every world live in
+`src/worlds/kit.ts`.
+
+**The idea:** a place to rest your eyes on, rather than a creature to look
+after. Nothing in it needs you; every motion is slow, and most of them loop
+without ever quite repeating.
+
+**Ground:** a slab of earth fills the floor of the cube and is cut away at the
+glass like a diorama, turf over banded soil. A ridge rises along the two back
+walls. The pond is three overlapping circles blended into one rounded shape,
+described by a signed distance, so anything can ask how far it is from the
+water's edge and which way is deeper. Its bed is pale and pebbly in the
+shallows and greener in the middle; steep banks turn from earth to stone.
+
+**Water:** a faceted surface that breathes with small waves and knows how deep
+the water is beneath each point: clear over the shallows, teal over the deep,
+with a soft line of foam where it meets the bank. Anything that touches it
+(a koi, the frog, a leaf, the waterfall, fish food) starts a ring that
+spreads and fades. The waterfall springs from the cleft between two big mossy
+rocks at the back (a third closes the gap behind), runs out between them,
+and drops in a streaked ribbon that spreads as it falls, with froth and spray
+at its foot.
+
+**Life:** three koi wander, rest, kiss the surface now and then, and gather
+for food. A frog sits for a long time (which is most of what frogs do),
+breathes, croaks (more after dark, with a little note drifting up), blinks,
+looks about, and moves house now and then: one hop if the next perch is
+close, otherwise a plop, a lazy swim and a hop back out. Its perches are the
+log, a stepping stone, two banks and the larger lily pads. A dragonfly hangs
+in the air, darts, rests on the cattails, dips to touch the water, and sleeps
+on a stalk at night; if it hovers too near the frog, the frog snaps at it
+and misses. Lily pads drift on a faint current, and their flowers fold shut
+toward evening. Leaves let go of the big tree and spin down onto the grass
+or float for a while. Fireflies come out at dusk; motes of dust turn in the
+daylight. Grass, ferns, reeds and trees all lean in one unhurried breeze.
+
+**Interactions:**
+- *Feed the koi.* Click the water: a pinch of food scatters on the surface
+  and the koi come up for it.
+- *Shake a tree.* Click one: it sways, and the leafy one drops a few leaves.
+- *The frog.* Rest the pointer on it and it turns to look at you; click it
+  and it croaks, or decides it is time to move.
+- *Tap the glass.* Click anywhere else (grass, stone, air): a ripple on the
+  pane, the koi scatter, the frog dives, the dragonfly darts away. The floor
+  fills the cube here, so a line of sight almost always ends on the ground;
+  only the water, the trees and the frog answer a click themselves.
+
+**Remembered:** where the lily pads have drifted, and where the frog sat.
 
 ## Later worlds (backlog)
 
