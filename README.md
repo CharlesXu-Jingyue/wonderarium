@@ -62,11 +62,11 @@ You need macOS, Git and Node 24. If you have them already, skip to step 3.
 3. **Get the code and install.**
 
    ```bash
-   git clone https://github.com/CharlesXu-Jingyue/desktop_bits_and_bobs.git
+   git clone https://github.com/CharlesXu-Jingyue/wonderarium.git
    ```
 
    ```bash
-   cd desktop_bits_and_bobs
+   cd wonderarium
    ```
 
    ```bash
@@ -79,7 +79,7 @@ You need macOS, Git and Node 24. If you have them already, skip to step 3.
 
    `nvm install` fetches and switches to Node 24 (skip it if you used Homebrew). `npm ci` installs exactly the versions in the lockfile, into the project's own `node_modules`.
 
-   The repository is private for now, so cloning needs a GitHub account that has been given access. If you have SSH keys set up with GitHub, `git clone git@github.com:CharlesXu-Jingyue/desktop_bits_and_bobs.git` works as well.
+   The repository is private for now, so cloning needs a GitHub account that has been given access. If you have SSH keys set up with GitHub, `git clone git@github.com:CharlesXu-Jingyue/wonderarium.git` works as well.
 
 4. **Open the box.**
 
