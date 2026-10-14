@@ -1,8 +1,8 @@
 {
-  "name": "desktop-bits-and-bobs",
+  "name": "wonderarium",
   "version": "0.0.0",
   "private": true,
-  "description": "A world in a box: a small glass cube on the desktop with a living sandbox inside.",
+  "description": "Wonderarium: a small glass cube on the desktop with a living world inside.",
   "type": "module",
   "main": "electron/main.mjs",
   "scripts": {

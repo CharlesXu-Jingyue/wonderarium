@@ -31,7 +31,7 @@ declare global {
   }
 }
 
-const STORAGE_KEY = 'world-in-a-box/state';
+const STORAGE_KEY = 'wonderarium/state';
 
 function browserBridge(): Bridge {
   let flags: WindowFlags = { fullscreen: false, pinned: false };

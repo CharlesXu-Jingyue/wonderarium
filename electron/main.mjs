@@ -19,14 +19,24 @@ try {
 } catch {
   // no local env file, which is fine
 }
-const DATA_DIR = process.env.BITS_DATA_DIR || path.join(app.getPath('appData'), 'World in a Box');
+const DATA_DIR = process.env.BITS_DATA_DIR || path.join(app.getPath('appData'), 'Wonderarium');
+// Before it had a name, the app kept its things under 'World in a Box'.
+// Move them across once, so nobody's hamster is forgotten in the rename.
+const LEGACY_DIR = path.join(app.getPath('appData'), 'World in a Box');
+if (!process.env.BITS_DATA_DIR && !fs.existsSync(DATA_DIR) && fs.existsSync(LEGACY_DIR)) {
+  try {
+    fs.renameSync(LEGACY_DIR, DATA_DIR);
+  } catch {
+    // leave it be; a fresh box starts instead
+  }
+}
 const ELECTRON_DIR = path.join(DATA_DIR, 'electron');
 const STATE_FILE = path.join(DATA_DIR, 'state.json');
 const WINDOW_FILE = path.join(DATA_DIR, 'window.json');
 const SHOTS_DIR = path.join(DATA_DIR, 'screenshots');
 
 fs.mkdirSync(ELECTRON_DIR, { recursive: true });
-app.setName('World in a Box');
+app.setName('Wonderarium');
 // Chromium's own caches, logs and crash dumps follow the data folder too, so
 // nothing is left behind in ~/Library.
 app.setPath('userData', ELECTRON_DIR);
@@ -124,7 +134,7 @@ async function createWindow() {
     maximizable: false,
     fullscreenable: false,
     show: false,
-    title: 'World in a Box',
+    title: 'Wonderarium',
     webPreferences: {
       preload: path.join(ROOT, 'electron', 'preload.cjs'),
       contextIsolation: true,

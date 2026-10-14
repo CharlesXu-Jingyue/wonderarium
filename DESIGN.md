@@ -1,4 +1,4 @@
-# World in a Box — design notes
+# Wonderarium: design notes
 
 A tiny, relaxing desktop toy: a glass cube floating on the desktop with a small,
 self-sustaining world inside. You watch it more than you play it.
