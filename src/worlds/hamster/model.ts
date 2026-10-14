@@ -156,7 +156,10 @@ export class HamsterModel {
     this.body.position.y = PIVOT.y + Math.abs(stride) * 0.007 * p.walk;
 
     // Head: keep looking forward-ish while sitting up; nibble and nod.
-    this.head.rotation.x = p.headPitch + 0.9 * p.sit - 0.2 * p.lean + Math.sin(t * 30) * 0.06 * p.nibble;
+    // Sitting up tips the belly up past the chin, so the head rises out of
+    // the chest as it sits, a little up and forward, to keep the face clear.
+    this.head.position.set(0, 0.115 + 0.012 * p.sit, 0.085 + 0.045 * p.sit).sub(PIVOT);
+    this.head.rotation.x = p.headPitch + 1.0 * p.sit - 0.2 * p.lean + Math.sin(t * 30) * 0.06 * p.nibble;
     this.head.rotation.y = p.headYaw;
     this.head.rotation.z = Math.sin(t * 6) * 0.08 * p.groom;
 
