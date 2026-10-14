@@ -30,6 +30,7 @@ export class Stage {
   private homing = 0; // seconds left in a reset-view glide
   private idle = 0;
   private pressStart = 0;
+  private pressAt = { x: 0, y: 0 };
   private worldHasPress = false;
   private readonly raycaster = new THREE.Raycaster();
   private readonly ndc = new THREE.Vector2();
@@ -42,6 +43,8 @@ export class Stage {
     this.renderer.shadowMap.type = THREE.PCFShadowMap;
     this.renderer.toneMapping = THREE.NeutralToneMapping;
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
+    // Worlds may clip their own materials (a hamster walking into a house).
+    this.renderer.localClippingEnabled = true;
 
     this.lighting = new Lighting(this.scene);
     this.scene.add(this.worldRoot, this.cube.group);
@@ -133,12 +136,15 @@ export class Stage {
       this.ndc.set(((e.clientX - rect.left) / rect.width) * 2 - 1, -((e.clientY - rect.top) / rect.height) * 2 + 1);
       this.raycaster.setFromCamera(this.ndc, this.camera);
       const held = kind === 'down' || kind === 'hover' ? 0 : (performance.now() - this.pressStart) / 1000;
-      return this.world.pointer({ kind, ray: this.raycaster.ray, held });
+      const used = this.world.pointer({ kind, ray: this.raycaster.ray, held });
+      this.canvas.style.cursor = this.world.cursor ?? '';
+      return used;
     };
 
     this.canvas.addEventListener('pointerdown', (e) => {
       this.wake();
       this.pressStart = performance.now();
+      this.pressAt = { x: e.clientX, y: e.clientY };
       this.worldHasPress = send('down', e);
       this.controls.enabled = !this.worldHasPress;
       if (this.worldHasPress) this.canvas.setPointerCapture(e.pointerId);
@@ -151,6 +157,11 @@ export class Stage {
 
     const release = (e: PointerEvent) => {
       if (this.worldHasPress) send('up', e);
+      else if (e.type === 'pointerup') {
+        // A short press that barely moved is a click, not a turn of the cube.
+        const moved = Math.hypot(e.clientX - this.pressAt.x, e.clientY - this.pressAt.y);
+        if (moved < 5 && performance.now() - this.pressStart < 400) send('click', e);
+      }
       this.worldHasPress = false;
       this.controls.enabled = true;
     };

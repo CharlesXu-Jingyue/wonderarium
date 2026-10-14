@@ -54,6 +54,8 @@ async function start() {
     disposeTree(stage.worldRoot);
   };
   mount(save.worldId);
+  // In a plain browser preview, leave a handle for poking at things.
+  if (!inElectron) Object.assign(window, { __box: { stage, clock, world: () => world } });
 
   const snapshot = (): SaveFile => ({
     version: 1,

@@ -13,7 +13,12 @@ export interface WorldContext {
   light: Readonly<LightState>;
 }
 
-export type WorldPointerKind = 'down' | 'move' | 'up' | 'hover' | 'leave';
+/**
+ * down/move/up: a press the world claimed (it returned true on 'down').
+ * click: a quick press-and-release the world did not claim, so the camera
+ * would otherwise ignore it. hover/leave: the pointer moving with no button.
+ */
+export type WorldPointerKind = 'down' | 'move' | 'up' | 'click' | 'hover' | 'leave';
 
 export interface WorldPointerEvent {
   kind: WorldPointerKind;
@@ -33,6 +38,8 @@ export interface World {
   render?(alpha: number): void;
   /** Return true when the world used the event, so the camera leaves it alone. */
   pointer?(event: WorldPointerEvent): boolean;
+  /** CSS cursor the world would like over the cube right now ('' for default). */
+  readonly cursor?: string;
   serialize?(): unknown;
   dispose?(): void;
 }

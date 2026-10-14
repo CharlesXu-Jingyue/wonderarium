@@ -1,8 +1,8 @@
 import { palette } from '../palette';
-import { StillLife } from './still-life';
+import { HamsterCage } from './hamster';
 import type { World } from './world';
 
-// Every world the box can hold. Adding one is a new file and a line here.
+// Every world the box can hold. Adding one is a new folder and a line here.
 
 export interface WorldEntry {
   id: string;
@@ -13,5 +13,5 @@ export interface WorldEntry {
 }
 
 export const WORLDS: WorldEntry[] = [
-  { id: 'still-life', name: 'Still Life', accent: palette.sage, create: () => new StillLife() },
+  { id: 'hamster-cage', name: 'Hamster Cage', accent: palette.peach, create: () => new HamsterCage() },
 ];

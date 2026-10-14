@@ -68,34 +68,46 @@ interface World {
 
 ## Hamster cage (world #1)
 
-**Contents:** a shallow wooden tray holding a bedding floor of wood shavings,
-an exercise wheel, a little wooden house (the nest), a food bowl, a water
-bottle and a chew stick.
+Code: `src/worlds/hamster/` (scenery, model, brain, nav, effects, index).
 
-**Hamster:** a Syrian hamster built as a rounded low-poly egg. It has small ears,
-bead eyes and pink feet. It uses squash-and-stretch, and its cheeks puff up
-when they are full.
+**Contents:** a wooden tray of bedding shavings; a deep wooden wheel on an
+A-frame stand; a plank house with an arched door and a round side window; a
+water bottle hung on the back wall; a food bowl; a chew log; a cheese block.
+Furniture is modelled once and shown 1.35 times larger; the hamster has its
+own scale (1.05), so it fits its wheel and its door.
 
-**Brain:** needs-based (utility AI).
-- Needs: hunger, thirst, energy, restlessness.
-- Actions: wander, sniff, eat, stuff cheeks, hoard food in the house, drink, run
-  on the wheel, burrow, groom, sleep in the nest.
-- Nocturnal bias: drowsy in daylight, lively at dusk and night.
+**Hamster:** a low-poly Syrian hamster made of parts that each move: it
+sits up, nibbles, stuffs its cheeks, grooms, digs, runs, and blinks. Each
+step the brain sets a handful of pose dials and the model follows smoothly.
+
+**Brain:** five needs (hunger, thirst, fatigue, restlessness, grooming)
+rise over time. Whenever it finishes something it scores what it could do
+next: the needs with a little randomness, and idle pastimes (wandering,
+sniffing, digging) with a lot, so they take turns. It leans nocturnal:
+sleepier by day, keener on the wheel at night. Each activity is a short
+run of stages (walk there, turn, do it, leave). It sleeps and hoards inside
+the house, disappearing behind the doorway as it walks in (the renderer cuts
+away whatever part of it is behind the front wall).
+
+**Getting around:** a 2 cm grid over the bedding records where the hamster
+fits; it follows routes found on that grid, pulled taut into straight
+segments, and is pushed out of furniture if it ever overlaps.
 
 **Interactions:**
-- *Drop food.* Click the floor and seeds fall in. The hamster notices, waddles
-  over and stuffs its cheeks.
-- *Tap the glass.* The hamster freezes, turns toward you, then goes back to
-  what it was doing.
-- *Pet / pick up.* Hover over the hamster to pet it, and it leans in. Drag to
-  lift it and set it down somewhere else.
-- *Rearrange.* Drag furniture across the floor. It snaps gently and avoids
-  overlapping.
+- *Drop food.* Click where you can see the bedding: a sunflower seed falls
+  there. The hamster notices, fetches it, and eats it (or pouches it if full).
+- *Tap the glass.* Click on empty glass, where your line of sight would leave
+  through a far wall: a ripple, and the hamster stands up and looks at you.
+- *Pet.* Rest the pointer on it: it turns to you, eyes half closed, hearts.
+- *Pick up / boop.* Drag it to lift it and set it down elsewhere; a quick
+  click is a boop (a little hop and a heart).
+- *Rearrange.* Drag furniture over the bedding. A move is refused if pieces
+  would overlap or leave the tray, or if any doorway, the wheel's opening,
+  the bottle, a side of the bowl, or the hamster itself would be cut off.
 
 **No upkeep:** the bowl and bottle never run out. Hunger and thirst still
-drive the hamster to eat and drink, which is part of the fun to watch, but
-they can never become a problem. Food you drop is an extra treat, not a
-necessity.
+drive it to eat and drink, which is part of the fun to watch, but they can
+never become a problem. Food you drop is an extra treat, not a necessity.
 
 ## Later worlds (backlog)
 
