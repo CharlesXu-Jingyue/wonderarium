@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>World in a Box</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <canvas id="stage"></canvas>
+
+      <div id="chrome">
+        <aside class="worlds" id="worlds">
+          <header>Worlds</header>
+          <div class="world-list" id="world-list"></div>
+        </aside>
+
+        <div class="topbar" id="topbar" title="Drag to move">
+          <button class="clock" id="time-btn" title="Time in the box">
+            <span class="sky-icon" id="sky-icon"></span>
+            <span id="time-label">--:--</span>
+            <span class="marker"></span>
+          </button>
+          <span class="sep"></span>
+          <button class="win" id="min-btn" title="Minimize"></button>
+          <button class="win" id="fs-btn" title="Fullscreen"></button>
+          <button class="win" id="close-btn" title="Close"></button>
+        </div>
+
+        <div class="popover time-panel" id="time-panel" hidden>
+          <div class="panel-head">
+            <span class="panel-time" id="panel-time">--:--</span>
+            <span class="panel-status" id="panel-status">real time</span>
+          </div>
+          <label class="row">
+            <span>Shift</span>
+            <input type="range" id="shift" min="-12" max="12" step="0.25" value="0" />
+            <output id="shift-out">0h</output>
+          </label>
+          <div class="row speeds" role="group" aria-label="Speed">
+            <span>Speed</span>
+            <button data-rate="1">1×</button>
+            <button data-rate="10">10×</button>
+            <button data-rate="60">60×</button>
+            <button data-rate="600">600×</button>
+          </div>
+          <button class="wide" id="sync-btn">Sync to real time</button>
+        </div>
+
+        <div class="tools" id="tools">
+          <button class="round" id="view-btn" title="Reset view"></button>
+          <button class="round" id="pause-btn" title="Pause"></button>
+          <button class="round" id="shot-btn" title="Screenshot"></button>
+          <button class="round" id="settings-btn" title="Settings"></button>
+        </div>
+
+        <div class="popover settings-panel" id="settings-panel" hidden>
+          <label class="toggle"><span>Keep on top</span><input type="checkbox" id="pin-toggle" /></label>
+          <label class="toggle"><span>Drift when idle</span><input type="checkbox" id="drift-toggle" /></label>
+          <button class="wide" id="shots-folder">Open screenshots folder</button>
+        </div>
+
+        <div class="toast" id="toast"></div>
+        <div class="resize" id="resize" title="Drag to resize"></div>
+      </div>
+    </div>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

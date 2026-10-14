@@ -22,9 +22,9 @@ self-sustaining world inside. You watch it more than you play it.
 | Area | Decision |
 |---|---|
 | Platform | Electron + Three.js (macOS first) |
-| Window | Frameless, transparent. Only the cube and its soft shadow are visible. Movable, resizable (1:1 aspect), native fullscreen (adds a pastel backdrop). Optional always-on-top. |
+| Window | Frameless, transparent, 3:2 landscape so the controls sit beside the cube rather than over it. Only the cube and its soft shadow are visible until you hover. Movable, resizable, fullscreen (adds a backdrop that follows the sky). Optional always-on-top. |
 | View | 3D glass cube you can orbit. Damped drag-to-rotate, scroll to zoom, limited tilt (never from below), slow idle drift. |
-| Aesthetic | Soft low-poly pastel: flat-shaded facets, muted palette, soft shadows, light fog |
+| Aesthetic | Soft low-poly, warm and toasty: flat-shaded facets, wood and cream tones with pastel accents, soft shadows. Visual reference: the hamster-cage mock-up shared on 2026-10-14. |
 | First world | Hamster cage |
 | Clock | Follows real local time by default. Adjustable: shift the time of day, change the speed, and "sync to real time" to snap back. |
 | Interactions | Drop food, tap the glass, pet / pick up the hamster, rearrange furniture |
@@ -33,18 +33,9 @@ self-sustaining world inside. You watch it more than you play it.
 
 ## Shell
 
-- **Chrome.** It is hidden until you hover. Then a grip appears for moving the
-  window, a resize corner appears, and a small control pill shows: time
-  (real / shifted / speed), pause, pin on top, fullscreen, and a world picker
-  (only the hamster for now).
-- **Cube.** Only the boundary: thin, faintly blue glass walls with brighter
-  edges at grazing angles (Fresnel) and rounded edges. It has no base or
-  contents of its own. Worlds fill it and collide against its walls. A soft
-  contact shadow is drawn inside the canvas so the cube appears to rest on the
-  desktop.
-- **Lighting.** A sun or moon light whose angle and colour follow the world
-  clock. Warm and low at dawn and dusk, lavender-indigo at night. A tiny warm
-  glow comes from the hamster house at night.
+- **Chrome.** Hidden until you hover. Then four things fade in: a Worlds panel on the left with a picture card per world; a pill at the top right with the sky icon, the box's time (click it for shift, speed and sync) and minimize, fullscreen and close (drag the pill to move the window); round tools along the bottom (reset view, pause, screenshot, settings); and a resize corner. Settings holds keep-on-top, drift-when-idle and the screenshots folder.
+- **Cube.** Only the boundary: faintly blue glass that looks thick at the edges (a soft bluish rim and a crisp highlight line), brighter at grazing angles (Fresnel), and it mirrors two sparse room lights (a tall window and a small warm lamp, fixed relative to the viewer), so reflections slide across the panes as the cube turns. It has no base or contents of its own. A soft contact shadow under it makes it seem to rest on the desktop.
+- **Lighting.** A sun or moon light whose angle and colour follow the world clock: warm and low at dawn and dusk, lavender at night, never black. The light belongs to the room, not the cube: turning the cube turns it under a fixed light, so shadows sweep across the contents (only turning around the vertical axis counts; the cube never tips). A tiny warm glow from the hamster house at night is planned.
 - **Runtime.** Fixed-step simulation, decoupled from rendering. It keeps running
   when the window is unfocused and throttles or pauses when the window is hidden.
 

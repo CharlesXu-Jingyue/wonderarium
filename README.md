@@ -17,10 +17,21 @@ Development with Claude Code runs inside the operating system's sandbox, configu
 ```bash
 nvm use
 npm ci
+npm run dev
 ```
+
+`npm run dev` has no dev server, because the sandbox forbids opening ports. Instead Vite rebuilds into `dist/renderer` whenever a file changes, Electron serves that folder through a private `app://` scheme, and the window reloads itself after each rebuild. Changes to `electron/` need a restart. `npm run typecheck` checks the TypeScript, and `npm run preview` serves the built page to an ordinary browser, where it falls back to `localStorage` and a stand-in wallpaper so you can judge the look without the desktop behind it.
 
 If you install outside a Claude Code session, set the Electron cache first so it lands in the project too:
 
 ```bash
 export electron_config_cache="$PWD/.cache/electron"
 ```
+
+Inside the sandbox, Electron's downloader ignores the network proxy unless it is told to use it, so the binary has to be fetched explicitly:
+
+```bash
+ELECTRON_GET_USE_PROXY=1 GLOBAL_AGENT_HTTPS_PROXY="$HTTPS_PROXY" node node_modules/electron/install.js
+```
+
+The window itself cannot open from inside the sandbox, which refuses the system services a native window needs, so `npm run dev` is run either by you or by Claude with an explicit, per-command exception.
