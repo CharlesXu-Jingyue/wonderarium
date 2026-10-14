@@ -1,0 +1,13 @@
+# dependencies and local caches (kept inside the project on purpose)
+node_modules/
+.cache/
+
+# build output
+dist/
+out/
+
+# machine-specific settings and paths
+.env.local
+.claude/settings.local.json
+
+.DS_Store
