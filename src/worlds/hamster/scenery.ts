@@ -9,9 +9,9 @@ export const GROUND = -0.44;
 /** Inner half-size of the tray. */
 export const TRAY = 0.45;
 /** Furniture is modelled at one size and shown this much larger... */
-export const S = 1.35;
+export const S = 1.08;
 /** ...and the hamster this much, so it fits its wheel and its door. */
-export const HS = 1.05;
+export const HS = 0.84;
 export const HAMSTER_R = 0.065 * HS;
 /** How far from the middle the hamster's centre may go. */
 export const ROAM = TRAY - HAMSTER_R;
@@ -211,6 +211,8 @@ export class House extends Furniture {
   static readonly D = 0.24;
   static readonly H = 0.17;
   private readonly glow: THREE.PointLight;
+  private knocked = 0;
+  private wobble = 0;
   private readonly lit: THREE.MeshStandardMaterial[] = [];
 
   constructor(look: Look) {
@@ -297,7 +299,15 @@ export class House extends Furniture {
     return out.setFromNormalAndCoplanarPoint(n, p);
   }
 
-  update(_dt: number, night: number) {
+  /** Someone knocked: the house rocks a little on its base. */
+  knock() {
+    this.knocked = 1;
+  }
+
+  update(dt: number, night: number) {
+    this.knocked = Math.max(0, this.knocked - dt * 2.5);
+    this.wobble += dt;
+    this.group.rotation.z = Math.sin(this.wobble * 38) * 0.035 * this.knocked * this.knocked;
     this.glow.intensity = 0.008 * night;
     for (const m of this.lit) m.emissive.set(C.glow).multiplyScalar(0.55 * night);
   }

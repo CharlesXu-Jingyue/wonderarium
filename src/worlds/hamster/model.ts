@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { C, Look, mesh } from './look';
+import { C, cheerio, Look, mesh } from './look';
 
 // The hamster's body: a low-poly Syrian hamster facing +z, feet at y = 0.
 // It has no behaviour of its own; the brain sets a Pose each step and the
@@ -32,7 +32,7 @@ export interface Pose {
   dangle: number;
   /** Front paws scraping at the bedding. */
   dig: number;
-  /** Holding a seed in the front paws. */
+  /** Holding a cheerio in the front paws. */
   hold: number;
 }
 
@@ -43,7 +43,8 @@ export const restPose = (): Pose => ({
 
 // The body tilts about a pivot near the haunches when sitting up.
 const PIVOT = new THREE.Vector3(0, 0.035, -0.08);
-const MOUTH = new THREE.Vector3(0, 0.088, 0.135);
+/** Where a held treat sits, in the head's own frame: just under the nose. */
+const MOUTH = new THREE.Vector3(0, -0.036, 0.092);
 
 export class HamsterModel {
   readonly root = new THREE.Group();
@@ -56,7 +57,7 @@ export class HamsterModel {
   private readonly nose: THREE.Mesh;
   private readonly front: THREE.Mesh[] = [];
   private readonly back: THREE.Mesh[] = [];
-  private readonly seed: THREE.Mesh;
+  private readonly snack: THREE.Mesh;
   private blinkIn = 2;
   private blinking = 0;
   /** Its own materials, so clipping the hamster never clips the cage. */
@@ -73,7 +74,7 @@ export class HamsterModel {
     const pink = own(look.mat(C.pink));
     const eye = own(look.mat(C.eye, { roughness: 0.3 }));
     const shine = own(look.mat('#FFFFFF', { roughness: 0.3 }));
-    const seed = own(look.mat(C.seed));
+    const oat = own(look.mat(C.cheerio));
     const blob = look.blob;
     // Parts of the body are given in root coordinates and shifted by the pivot.
     const onBody = (m: THREE.Mesh) => {
@@ -123,10 +124,10 @@ export class HamsterModel {
     this.nose = mesh(blob, pink, [0, -0.005, 0.083], 0.008);
     this.head.add(this.nose);
 
-    this.seed = mesh(look.blob, seed, [0, 0, 0], [0.008, 0.006, 0.016]);
-    this.seed.position.copy(MOUTH).sub(PIVOT);
-    this.seed.visible = false;
-    this.body.add(this.seed);
+    // Held upright in the paws, like a tiny doughnut.
+    this.snack = mesh(cheerio(), oat, [0, 0, 0], 0.0085);
+    this.snack.visible = false;
+    this.body.add(this.snack);
   }
 
   /** Hide whatever part of the hamster is behind this plane (or stop). */
@@ -147,14 +148,15 @@ export class HamsterModel {
   apply(p: Pose, walkPhase: number, t: number, dt: number, asleep = false) {
     // Body: sit up about the haunches, lean forward, roll a little in stride.
     const stride = Math.sin(walkPhase);
-    this.body.rotation.x = -0.62 * p.sit + 0.28 * p.lean + 0.12 * p.dig;
+    // Sitting up is nearly upright on the haunches, like a hamster with a snack.
+    this.body.rotation.x = -1.05 * p.sit + 0.28 * p.lean + 0.12 * p.dig;
     this.body.rotation.z = stride * 0.05 * p.walk;
     const breathe = 1 + Math.sin(t * (asleep ? 1.6 : 3.2)) * 0.018;
     this.body.scale.set(1, breathe * (1 + 0.06 * p.dangle), 1);
     this.body.position.y = PIVOT.y + Math.abs(stride) * 0.007 * p.walk;
 
     // Head: keep looking forward-ish while sitting up; nibble and nod.
-    this.head.rotation.x = p.headPitch + 0.4 * p.sit - 0.2 * p.lean + Math.sin(t * 30) * 0.06 * p.nibble;
+    this.head.rotation.x = p.headPitch + 0.9 * p.sit - 0.2 * p.lean + Math.sin(t * 30) * 0.06 * p.nibble;
     this.head.rotation.y = p.headYaw;
     this.head.rotation.z = Math.sin(t * 6) * 0.08 * p.groom;
 
@@ -174,13 +176,18 @@ export class HamsterModel {
     const open = Math.min(p.eyes, this.blinking > 0 ? 0.1 : 1) * (1 + 0.25 * p.alert);
     for (const eye of this.eyes) eye.scale.set(0.012, 0.012 * Math.max(0.12, open), 0.012);
 
+    // The mouth follows the head, however upright the body is.
+    this.head.updateMatrix();
+    const mouth = MOUTH.clone().applyMatrix4(this.head.matrix);
+    this.snack.position.copy(mouth);
+
     // Front paws: on the ground (walking, digging) or up at the mouth.
     this.front.forEach((paw, i) => {
       const side = i === 0 ? 1 : -1;
       const phase = walkPhase + (i === 0 ? 0 : Math.PI);
       const ground = new THREE.Vector3(side * 0.038, 0.012 - 0.015 * p.dangle, 0.085 + Math.sin(phase) * 0.022 * p.walk);
       ground.z += Math.sin(t * 22 + i * Math.PI) * 0.02 * p.dig;
-      const up = new THREE.Vector3(side * 0.022, MOUTH.y, MOUTH.z - 0.012);
+      const up = mouth.clone().add(PIVOT).add(new THREE.Vector3(side * 0.019, -0.008, -0.006));
       up.x += Math.sin(t * 11 + i) * 0.012 * p.groom;
       up.y += Math.cos(t * 11 + i) * 0.014 * p.groom;
       paw.position.lerpVectors(ground, up, Math.max(p.paws, p.groom)).sub(PIVOT);
@@ -190,6 +197,6 @@ export class HamsterModel {
       const phase = walkPhase + (i === 0 ? Math.PI : 0);
       paw.position.set(side * (0.055 + 0.01 * p.dangle), 0.011 - 0.03 * p.dangle, -0.07 + Math.sin(phase) * 0.02 * p.walk);
     });
-    this.seed.visible = p.hold > 0.5;
+    this.snack.visible = p.hold > 0.5;
   }
 }

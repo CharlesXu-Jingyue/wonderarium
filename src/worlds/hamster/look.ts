@@ -1,3 +1,5 @@
+import * as THREE from 'three';
+
 // Colours for the hamster cage, after the visual reference: warm wood,
 // cream bedding and a peach hamster. The shared kit is passed through here.
 
@@ -25,7 +27,7 @@ export const C = {
   glass: '#EEF6FB',
   cap: '#E9DCC8',
   metal: '#B9BCC2',
-  seed: '#5B4A3E',
+  cheerio: '#DC9A3A',
   kibble: ['#8E6A45', '#C98B4E', '#7FA25A', '#E3B15F', '#A7744A', '#D9C49A'],
   bark: '#A4703F',
   logInner: '#E7C08C',
@@ -35,3 +37,8 @@ export const C = {
 } as const;
 
 export { Look, mesh, pick, rand } from '../kit';
+
+/** A little oat ring, the treat you drop: a chunky low-poly torus, radius 1. */
+export function cheerio() {
+  return new THREE.TorusGeometry(1, 0.48, 5, 9);
+}

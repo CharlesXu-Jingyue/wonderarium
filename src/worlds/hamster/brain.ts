@@ -121,6 +121,8 @@ export class Hamster {
   private walkPhase = 0;
   private walking = 0;
   private solid = true;
+  /** Seconds left of staying up after being knocked awake. */
+  private roused = 0;
   private time = 0;
   private petIdle = 0;
   private path: { to: THREE.Vector2; version: number; points: THREE.Vector2[]; age: number } | null = null;
@@ -190,7 +192,20 @@ export class Hamster {
     this.begin('startle');
   }
 
-  /** A seed landed somewhere. */
+  /**
+   * A knock on the house. Asleep inside, it wakes and comes out, still a
+   * little drowsy, and stays up a while; awake outside, it looks round.
+   */
+  knock() {
+    const { kind, stage } = this.task;
+    if (kind === 'sleep' && stage === 2) {
+      this.needs.fatigue = Math.min(this.needs.fatigue, 0.5);
+      this.roused = rand(180, 300);
+      this.next(3);
+    } else if (this.shown && !this.busy) this.begin('startle');
+  }
+
+  /** A treat landed somewhere. */
   noticeTreat() {
     if (this.busy || this.task.kind === 'treat' || this.task.kind === 'eat') return;
     this.begin('treat');
@@ -216,6 +231,7 @@ export class Hamster {
 
   step(dt: number) {
     this.time += dt;
+    this.roused = Math.max(0, this.roused - dt);
     this.updateNeeds(dt);
     this.target = restPose();
     this.target.cheeks = this.cheeks;
@@ -290,7 +306,7 @@ export class Hamster {
     const idle = () => 0.6 + Math.random() * 0.8;
     const drowsy = n.fatigue + 0.3 * day;
     const options: [Kind, number][] = [
-      ['sleep', drowsy > 0.65 ? (drowsy + 0.4) * r() : 0],
+      ['sleep', drowsy > 0.65 && this.roused <= 0 ? (drowsy + 0.4) * r() : 0],
       ['eat', n.hunger * 1.1 * r()],
       ['drink', n.thirst * 1.1 * r()],
       ['wheel', n.restless * (1.6 - 0.7 * day) * r()],
@@ -471,7 +487,7 @@ export class Hamster {
           p.nibble = 1;
           if (task.t > task.dur) this.next(3, rand(3, 4.5));
         } else if (task.stage === 3) {
-          // Sit up and eat a seed from the paws.
+          // Sit up and eat from the paws.
           p.sit = 1;
           p.paws = 1;
           p.hold = 1;
@@ -670,7 +686,7 @@ export class Hamster {
 
       case 'treat': {
         if (task.stage === 0) {
-          // A beat of alertness, then go for the nearest landed seed.
+          // A beat of alertness, then go for the nearest landed treat.
           p.sit = 0.6;
           p.alert = 1;
           p.sniff = 1;
@@ -708,13 +724,15 @@ export class Hamster {
             }
           }
         } else {
-          // Treats go into the cheeks when full, otherwise straight down.
+          // Up on the hind legs with the treat in both paws. When full it
+          // turns it over a moment, then tucks it into a cheek for later.
           const stuff = this.needs.hunger < 0.25;
-          p.sit = stuff ? 0.2 : 1;
-          p.paws = stuff ? 0.2 : 1;
-          p.hold = stuff ? 0 : 1;
+          const tucked = stuff && task.t > task.dur * 0.5;
+          p.sit = 1;
+          p.paws = 1;
+          p.hold = tucked ? 0 : 1;
           p.nibble = 1;
-          if (stuff) this.cheeks = Math.min(1, this.cheeks + dt * 0.12);
+          if (tucked) this.cheeks = Math.min(1, this.cheeks + dt * 0.24);
           if (task.t > task.dur) {
             this.needs.hunger = Math.max(0, this.needs.hunger - 0.15);
             done();

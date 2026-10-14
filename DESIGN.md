@@ -61,7 +61,7 @@ interface World {
 | Hamster fur (peach) | `#F2C29B`, belly `#FFF8F0` |
 | Sage (plants, house roof) | `#B7CDB0` |
 | Dusty blue (glass tint, bottle) | `#A9C1D9` |
-| Butter (wheel, seeds) | `#F3DFA2` |
+| Butter (wheel, cheerios) | `#F3DFA2` |
 | Blush accent (ears, nose, feet) | `#E8A598` |
 | Wood (tray, house) | `#D9B99B` |
 | Night ambient | `#5E6A9E` |
@@ -73,8 +73,9 @@ Code: `src/worlds/hamster/` (scenery, model, brain, nav, effects, index).
 **Contents:** a wooden tray of bedding shavings; a deep wooden wheel on an
 A-frame stand; a plank house with an arched door and a round side window; a
 water bottle hung on the back wall; a food bowl; a chew log; a cheese block.
-Furniture is modelled once and shown 1.35 times larger; the hamster has its
-own scale (1.05), so it fits its wheel and its door.
+Furniture is modelled once and shown 1.08 times its modelled size; the
+hamster has its own scale (0.84), so it fits its wheel and its door. Both
+were once a fifth larger, which filled the tray; smaller, the cage breathes.
 
 **Hamster:** a low-poly Syrian hamster made of parts that each move: it
 sits up, nibbles, stuffs its cheeks, grooms, digs, runs, and blinks. Each
@@ -94,13 +95,17 @@ fits; it follows routes found on that grid, pulled taut into straight
 segments, and is pushed out of furniture if it ever overlaps.
 
 **Interactions:**
-- *Drop food.* Click where you can see the bedding: a sunflower seed falls
-  there. The hamster notices, fetches it, and eats it (or pouches it if full).
+- *Drop food.* Click where you can see the bedding: a cheerio falls
+  there. The hamster notices, fetches it, sits up on its hind legs and eats
+  it from its paws (or, if full, tucks it into a cheek for later).
 - *Tap the glass.* Click on empty glass, where your line of sight would leave
   through a far wall: a ripple, and the hamster stands up and looks at you.
 - *Pet.* Rest the pointer on it: it turns to you, eyes half closed, hearts.
 - *Pick up / boop.* Drag it to lift it and set it down elsewhere; a quick
   click is a boop (a little hop and a heart).
+- *Knock.* Tap the house (a press that does not drag it): it rocks a little,
+  and a hamster asleep inside wakes, comes out still drowsy, stretches, and
+  stays up a few minutes before it is ready for bed again.
 - *Rearrange.* Drag furniture over the bedding. A move is refused if pieces
   would overlap or leave the tray, or if any doorway, the wheel's opening,
   the bottle, a side of the bowl, or the hamster itself would be cut off.

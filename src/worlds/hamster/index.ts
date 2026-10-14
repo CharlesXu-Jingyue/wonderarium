@@ -4,17 +4,18 @@ import type { World, WorldContext, WorldPointerEvent } from '../world';
 import { HOLD, Hamster, type Cage, type HamsterSave, type Treat } from './brain';
 import { Effects } from './effects';
 import { NavGrid } from '../nav';
-import { C, Look, rand } from './look';
+import { C, cheerio, Look, rand } from './look';
 import {
   Bottle, Bowl, buildBedding, buildTray, Cheese, Furniture, GROUND, HAMSTER_R, House, Log, ROAM, TRAY, Wheel,
   type Capsule, type FurnitureId,
 } from './scenery';
 
 // The hamster cage: scenery, a hamster with a mind of its own, and the ways
-// you can play with it. Click the bedding to drop a sunflower seed, tap the
+// you can play with it. Click the bedding to drop a cheerio, tap the
 // glass to startle it, rest the pointer on it to pet it, drag it to
-// pick it up (a quick click is a boop), and drag furniture to rearrange.
-// Clicks that see through to the bedding drop seeds; clicks on empty glass
+// pick it up (a quick click is a boop), drag furniture to rearrange, and
+// tap the house to knock (which wakes a sleeping hamster).
+// Clicks that see through to the bedding drop cheerios; clicks on empty glass
 // (where you would see out through a far wall) tap it.
 
 interface CageSave {
@@ -56,7 +57,7 @@ function capsuleGap(c: Capsule, d: Capsule) {
 
 type Drag =
   | { kind: 'hamster'; start: THREE.Vector3; lifted: boolean }
-  | { kind: 'furniture'; f: Furniture; offset: THREE.Vector2 };
+  | { kind: 'furniture'; f: Furniture; offset: THREE.Vector2; start: THREE.Vector3; moved: boolean };
 
 export class HamsterCage implements World {
   readonly id = 'hamster-cage';
@@ -208,19 +209,20 @@ export class HamsterCage implements World {
       at.set(at.x + rand(-0.06, 0.06), at.y + rand(-0.06, 0.06));
     }
     at.clampScalar(-TRAY + 0.03, TRAY - 0.03);
-    const seed = new THREE.Mesh(this.look.blob, this.look.mat(C.seed));
-    seed.scale.set(0.009, 0.0065, 0.018);
-    seed.position.set(at.x, 0.4, at.y);
-    seed.rotation.set(rand(0, 3), rand(0, 3), rand(0, 3));
-    seed.castShadow = true;
-    this.ctx.root.add(seed);
-    this.treats.push({ mesh: seed, vy: 0, landed: false });
+    const oat = new THREE.Mesh(cheerio(), this.look.mat(C.cheerio));
+    oat.scale.setScalar(0.009);
+    oat.position.set(at.x, 0.4, at.y);
+    oat.rotation.set(rand(0, 3), rand(0, 3), rand(0, 3));
+    oat.castShadow = true;
+    this.ctx.root.add(oat);
+    this.treats.push({ mesh: oat, vy: 0, landed: false });
   }
 
   private removeTreat(t: Treat) {
     const i = this.treats.indexOf(t);
     if (i >= 0) this.treats.splice(i, 1);
     this.ctx.root.remove(t.mesh);
+    t.mesh.geometry.dispose();
   }
 
   private updateTreats(dt: number) {
@@ -237,7 +239,8 @@ export class HamsterCage implements World {
           t.vy = -t.vy * 0.25;
         } else {
           t.landed = true;
-          t.mesh.rotation.set(0, rand(0, Math.PI * 2), 0);
+          // Settle flat on the bedding, a little askew.
+          t.mesh.rotation.set(Math.PI / 2 + rand(-0.15, 0.15), 0, rand(0, Math.PI * 2));
           this.hamster.noticeTreat();
         }
       }
@@ -289,7 +292,7 @@ export class HamsterCage implements World {
           this.drag = { kind: 'hamster', start, lifted: false };
         } else {
           const p = this.onPlane(e.ray, GROUND) ?? new THREE.Vector3(hit.x, 0, hit.z);
-          this.drag = { kind: 'furniture', f: hit, offset: new THREE.Vector2(hit.x - p.x, hit.z - p.z) };
+          this.drag = { kind: 'furniture', f: hit, offset: new THREE.Vector2(hit.x - p.x, hit.z - p.z), start: p, moved: false };
         }
         return true;
       }
@@ -307,7 +310,11 @@ export class HamsterCage implements World {
           if (this.hamster.holding) this.hamster.holdAt.set(p.x, p.z);
         } else {
           const p = this.onPlane(e.ray, GROUND);
-          if (p) this.tryMove(d.f, p.x + d.offset.x, p.z + d.offset.y);
+          // A press that barely moves is a tap, not a drag.
+          if (p && (d.moved || p.distanceTo(d.start) > 0.012)) {
+            d.moved = true;
+            this.tryMove(d.f, p.x + d.offset.x, p.z + d.offset.y);
+          }
         }
         return true;
       }
@@ -319,13 +326,17 @@ export class HamsterCage implements World {
         if (d?.kind === 'hamster') {
           if (d.lifted) this.hamster.drop();
           else this.hamster.boop();
+        } else if (d && !d.moved && e.held < 0.4 && d.f === this.house) {
+          // A tap on the house is a knock at the door.
+          this.house.knock();
+          this.hamster.knock();
         }
         return true;
       }
 
       case 'click': {
         // If the line of sight reaches the bedding inside the cube, the click
-        // was on the floor: sprinkle a seed there. If it would leave through a
+        // was on the floor: drop a cheerio there. If it would leave through a
         // far wall first, it was on empty glass: tap.
         const floor = this.onPlane(e.ray, GROUND);
         if (floor && Math.abs(floor.x) < TRAY && Math.abs(floor.z) < TRAY) {
