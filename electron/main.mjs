@@ -48,10 +48,11 @@ protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { standard: true, secure: true, supportFetchAPI: true } },
 ]);
 
-// Landscape, so the controls have room beside the cube instead of over it.
-const ASPECT = 3 / 2;
-const DEFAULT_WIDTH = 690;
-const MIN_WIDTH = 360;
+// Just wide enough for the worlds panel to stand beside the cube, which is
+// centred; the time bar sits above it and the tools below.
+const ASPECT = 11 / 8;
+const DEFAULT_WIDTH = 632;
+const MIN_WIDTH = 480;
 
 /** @type {BrowserWindow | null} */
 let win = null;
@@ -86,7 +87,10 @@ function writeJson(file, value) {
 // ---------- window ----------
 
 function restoredBounds(saved) {
-  const width = Math.max(MIN_WIDTH, Math.round(saved?.width ?? DEFAULT_WIDTH));
+  // A window saved at another shape keeps its height, so the cube stays
+  // the size it was. (Before the shape was saved, it was always 3:2.)
+  const savedWidth = saved?.width && saved.width * (ASPECT / (saved.aspect ?? 3 / 2));
+  const width = Math.max(MIN_WIDTH, Math.round(savedWidth || DEFAULT_WIDTH));
   const height = Math.round(width / ASPECT);
   if (saved && Number.isFinite(saved.x) && Number.isFinite(saved.y)) {
     // Only reuse the old spot if it is still on a connected display.
@@ -116,7 +120,7 @@ function saveWindowSoon() {
   saveBoundsTimer = setTimeout(() => {
     if (!win || flags().fullscreen) return;
     const { x, y, width } = win.getBounds();
-    writeJson(WINDOW_FILE, { x, y, width, pinned: win.isAlwaysOnTop() }).catch(() => {});
+    writeJson(WINDOW_FILE, { x, y, width, aspect: ASPECT, pinned: win.isAlwaysOnTop() }).catch(() => {});
   }, 400);
 }
 

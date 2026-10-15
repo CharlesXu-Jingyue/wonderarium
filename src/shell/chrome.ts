@@ -276,17 +276,17 @@ export class Chrome {
 
   private wireResize() {
     const corner = $('resize');
-    let start: { width: number; x: number; y: number } | null = null;
+    let start: { width: number; aspect: number; x: number; y: number } | null = null;
     let pending = 0;
     corner.addEventListener('pointerdown', (e) => {
       corner.setPointerCapture(e.pointerId);
-      start = { width: window.innerWidth, x: e.screenX, y: e.screenY };
+      start = { width: window.innerWidth, aspect: window.innerWidth / window.innerHeight, x: e.screenX, y: e.screenY };
       this.busy = true;
     });
     corner.addEventListener('pointermove', (e) => {
       if (!start) return;
-      // Follow whichever direction the pointer moved further, keeping 3:2.
-      const d = Math.max(e.screenX - start.x, (e.screenY - start.y) * 1.5);
+      // Follow whichever direction the pointer moved further, keeping the shape.
+      const d = Math.max(e.screenX - start.x, (e.screenY - start.y) * start.aspect);
       const width = start.width + d;
       cancelAnimationFrame(pending);
       pending = requestAnimationFrame(() => bridge.window.setWidth(width));

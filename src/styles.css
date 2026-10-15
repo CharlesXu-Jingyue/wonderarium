@@ -115,9 +115,11 @@ svg {
 
 /* ---------- worlds panel ---------- */
 
+/* At the left edge, level with the time bar's margin on the right. The
+   window is shaped so that this leaves the panel just clear of the cube. */
 .worlds {
   position: absolute;
-  left: 3%;
+  left: 12px;
   top: 50%;
   transform: translateY(-50%);
   width: clamp(96px, 19%, 150px);
@@ -208,11 +210,9 @@ svg {
   border-radius: 18px;
   background: var(--card);
   box-shadow: var(--shadow);
-  -webkit-app-region: drag;
 }
 
 .topbar button {
-  -webkit-app-region: no-drag;
   height: 28px;
   border-radius: 14px;
   display: grid;
@@ -271,12 +271,32 @@ svg {
   height: 14px;
 }
 
-body.fullscreen .topbar {
+/* ---------- dragging the window ----------
+
+   Any bare part of a panel moves the window: the top bar, the worlds panel,
+   the round tools and the popovers, everywhere but on the things in them
+   that answer a click. */
+.topbar,
+.worlds,
+.tools,
+.popover {
+  -webkit-app-region: drag;
+}
+
+#chrome button,
+#chrome input,
+#chrome label,
+#chrome output,
+#chrome a,
+.world-card,
+.resize {
   -webkit-app-region: no-drag;
 }
 
-/* Drag regions ignore opacity, so switch them off while hidden. */
-#app:not(.awake) .topbar {
+/* Nothing to move in fullscreen, and drag regions ignore opacity, so switch
+   them off while the chrome is hidden too. */
+body.fullscreen #chrome *,
+#app:not(.awake) #chrome * {
   -webkit-app-region: no-drag;
 }
 
@@ -468,9 +488,11 @@ body.fullscreen .resize {
 /* ---------- narrow screens (a phone, on the web) ---------- */
 
 /* The cube fills the width, so the worlds become a row of cards under the
-   clock, and the link to the project moves up to the opposite corner. */
+   clock, and the link to the project moves up to the opposite corner. Only
+   in a browser: the desktop window keeps its shape, and the panel always
+   fits beside the cube there. */
 @media (max-width: 600px) {
-  .worlds {
+  body.browser .worlds {
     left: 50%;
     top: 68px;
     transform: translateX(-50%);
@@ -479,21 +501,21 @@ body.fullscreen .resize {
     padding: 8px;
   }
 
-  .worlds header {
+  body.browser .worlds header {
     display: none;
   }
 
-  .world-list {
+  body.browser .world-list {
     flex-direction: row;
     overflow: visible;
   }
 
-  .world-card {
+  body.browser .world-card {
     width: 96px;
     flex: none;
   }
 
-  .world-card.soon {
+  body.browser .world-card.soon {
     width: 44px;
     display: grid;
     place-items: center;
