@@ -83,7 +83,10 @@ export function buildTray(root: THREE.Group, look: Look) {
   const outer = TRAY + t;
   const bottom = -0.49;
   const top = -0.34;
-  const floor = mesh(new THREE.BoxGeometry(outer * 2, 0.02, outer * 2), look.mat(C.trayDark), [0, bottom + 0.01, 0]);
+  // Tucked just inside the walls: flush with them, its sides would share a
+  // plane with the boards' outer faces and flicker as the cube turns.
+  const slab = (outer - 0.003) * 2;
+  const floor = mesh(new THREE.BoxGeometry(slab, 0.02, slab), look.mat(C.trayDark), [0, bottom + 0.01, 0]);
   root.add(floor);
 
   // Each wall is two stacked boards in slightly different shades.

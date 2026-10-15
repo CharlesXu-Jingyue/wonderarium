@@ -9,7 +9,7 @@ import type { World, WorldPointerKind } from '../worlds/world';
 
 const FOV = 28;
 const FIT_RADIUS = 0.98; // cube corners plus a little room for its shadow
-const IDLE_BEFORE_DRIFT = 45; // seconds without input before the slow orbit
+const IDLE_BEFORE_DRIFT = 10; // seconds without input before the slow orbit
 const HOME_POLAR = 1.08;
 const HOME_AZIMUTH = Math.PI / 4;
 /** Where the glass cuts off anything that grows past it. */
