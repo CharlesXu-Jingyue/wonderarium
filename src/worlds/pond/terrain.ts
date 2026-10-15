@@ -97,10 +97,12 @@ export function buildTerrain(look: Look): THREE.Mesh {
   const side: number[] = [];
   const sideColors: number[] = [];
   const color = new THREE.Color();
-  const quad = (p: THREE.Vector3, q: THREE.Vector3, y0: number, y1p: number, y1q: number, hex: string, out: THREE.Vector3) => {
+  // Each band has its own top and bottom at either end, so it follows the
+  // slope of the ground and meets the band above it with no gap between.
+  const quad = (p: THREE.Vector3, q: THREE.Vector3, y0p: number, y0q: number, y1p: number, y1q: number, hex: string, out: THREE.Vector3) => {
     const v = [
-      [p.x, y1p, p.z], [q.x, y1q, q.z], [q.x, y0, q.z],
-      [p.x, y1p, p.z], [q.x, y0, q.z], [p.x, y0, p.z],
+      [p.x, y1p, p.z], [q.x, y1q, q.z], [q.x, y0q, q.z],
+      [p.x, y1p, p.z], [q.x, y0q, q.z], [p.x, y0p, p.z],
     ];
     // Wind each side so it faces out of the slab.
     if (out.dot(new THREE.Vector3().subVectors(q, p).cross(new THREE.Vector3(0, 1, 0))) > 0) v.reverse();
@@ -121,8 +123,11 @@ export function buildTerrain(look: Look): THREE.Mesh {
       const p = edge(k);
       const q = edge(k + 1);
       const soil = pick2(P.soil, rnd);
-      quad(p, q, p.y - 0.012, p.y, q.y, P.turf, out);
-      const band = (y0: number, y1: number, hex: string) => quad(p, q, y0, Math.min(y1, p.y - 0.012), Math.min(y1, q.y - 0.012), hex, out);
+      const tp = p.y - 0.012;
+      const tq = q.y - 0.012;
+      quad(p, q, tp, tq, p.y, q.y, P.turf, out);
+      const band = (y0: number, y1: number, hex: string) =>
+        quad(p, q, Math.min(y0, tp), Math.min(y0, tq), Math.min(y1, tp), Math.min(y1, tq), hex, out);
       band(-0.415, 0, soil);
       band(-0.455, -0.415, P.soilDark);
       band(BASE, -0.455, P.soilDeep);
@@ -184,7 +189,7 @@ export interface StoneSpec {
 
 export function buildStones(look: Look, specs: StoneSpec[]) {
   const group = new THREE.Group();
-  const material = look.mat('#FFFFFF', { vertexColors: true });
+  const material = stoneMaterial(look);
   specs.forEach((s, i) => {
     const m = new THREE.Mesh(stoneGeometry(101 + i * 17, s.moss ?? 0.55), material);
     m.position.set(...s.at);
@@ -195,6 +200,96 @@ export function buildStones(look: Look, specs: StoneSpec[]) {
     group.add(m);
   });
   return group;
+}
+
+// ---------- stones cut at the edge ----------
+
+// Stones near a wall are cut off where the soil ends, not at the glass a few
+// millimetres further out: otherwise their buried bases would hang down past
+// the cut-away side of the slab. Each cut is then closed with a flat face of
+// stone, so the rock reads as solid rather than as a hollow shell.
+const SLAB_EDGES = [
+  [1, 0, 0], [-1, 0, 0], [0, 0, 1], [0, 0, -1],
+].map(([x, y, z]) => new THREE.Plane(new THREE.Vector3(x, y, z), EDGE));
+
+const stoneMaterials = new WeakMap<Look, THREE.MeshStandardMaterial>();
+
+/** The stones' material: the ground's, but clipped at the edge of the slab. */
+export function stoneMaterial(look: Look) {
+  let m = stoneMaterials.get(look);
+  if (!m) {
+    m = look.mat('#FFFFFF', { vertexColors: true }).clone();
+    m.clippingPlanes = [...SLAB_EDGES];
+    stoneMaterials.set(look, m);
+  }
+  return m;
+}
+
+/**
+ * Flat faces over every place a stone in `stones` is cut by the slab's edge.
+ * Each is the outline of the cut, filled in, and sits in the same plane as
+ * the slab's side; drawn a touch behind it, so below the grass the soil
+ * still shows and only the part standing above it is stone.
+ */
+export function edgeCaps(look: Look, stones: THREE.Group) {
+  const caps = new THREE.Group();
+  const material = look.mat(P.rock[3]).clone();
+  material.polygonOffset = true;
+  material.polygonOffsetFactor = 1;
+  material.polygonOffsetUnits = 2;
+  const tri = [new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()];
+  stones.updateMatrixWorld(true);
+  for (const stone of stones.children) {
+    if (!(stone instanceof THREE.Mesh)) continue;
+    const pos = stone.geometry.getAttribute('position');
+    for (const plane of SLAB_EDGES) {
+      // Where the stone's surface crosses the plane.
+      const cut: THREE.Vector3[] = [];
+      for (let i = 0; i < pos.count; i += 3) {
+        tri.forEach((v, k) => v.fromBufferAttribute(pos, i + k).applyMatrix4(stone.matrix));
+        for (let k = 0; k < 3; k++) {
+          const p = tri[k];
+          const q = tri[(k + 1) % 3];
+          const dp = plane.distanceToPoint(p);
+          const dq = plane.distanceToPoint(q);
+          if (dp < 0 !== dq < 0) cut.push(p.clone().lerp(q, dp / (dp - dq)));
+        }
+      }
+      if (cut.length < 3) continue;
+      const outline = hull(cut, plane.normal.x !== 0 ? 'z' : 'x');
+      const out = plane.normal.clone().negate();
+      const vertices: number[] = [];
+      for (let i = 1; i + 1 < outline.length; i++) {
+        const [a, b, c] = [outline[0], outline[i], outline[i + 1]];
+        const facing = new THREE.Vector3().subVectors(b, a).cross(new THREE.Vector3().subVectors(c, a)).dot(out);
+        for (const v of facing > 0 ? [a, b, c] : [a, c, b]) vertices.push(v.x, v.y, v.z);
+      }
+      const geometry = new THREE.BufferGeometry();
+      geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+      geometry.computeVertexNormals();
+      const cap = new THREE.Mesh(geometry, material);
+      cap.receiveShadow = true;
+      caps.add(cap);
+    }
+  }
+  return caps;
+}
+
+/** The convex outline of points lying in a wall plane, by height and `along`. */
+function hull(points: THREE.Vector3[], along: 'x' | 'z') {
+  const pts = [...points].sort((a, b) => a[along] - b[along] || a.y - b.y);
+  const cross = (o: THREE.Vector3, a: THREE.Vector3, b: THREE.Vector3) =>
+    (a[along] - o[along]) * (b.y - o.y) - (a.y - o.y) * (b[along] - o[along]);
+  const half = (list: THREE.Vector3[]) => {
+    const h: THREE.Vector3[] = [];
+    for (const p of list) {
+      while (h.length >= 2 && cross(h[h.length - 2], h[h.length - 1], p) <= 0) h.pop();
+      h.push(p);
+    }
+    h.pop();
+    return h;
+  };
+  return [...half(pts), ...half([...pts].reverse())];
 }
 
 /** Small pebbles scattered over the pond bed, seen through the water. */

@@ -10,7 +10,7 @@ import { Frog, type FrogWorld, type Perch } from './frog';
 import { Koi, type Pellet, type Pond } from './koi';
 import { P } from './look';
 import { Cattails, fern, flower, grass, leafTree, LilyPad, log, mushrooms, pine, type Swaying, type Tree, Wind } from './plants';
-import { buildPebbles, buildStones, buildTerrain, stoneGeometry, groundHeight, pondInward, pondSdf, WATER, type StoneSpec } from './terrain';
+import { buildPebbles, buildStones, buildTerrain, edgeCaps, stoneGeometry, stoneMaterial, groundHeight, pondInward, pondSdf, WATER, type StoneSpec } from './terrain';
 import { Water } from './water';
 
 // A forest pond: water falling over mossy rocks into a clear pool, koi
@@ -147,7 +147,7 @@ export class ForestPond implements World {
       geometry.computeBoundingBox();
       const box = geometry.boundingBox!;
       const inner = side < 0 ? box.max.z : box.min.z;
-      const rock = new THREE.Mesh(geometry, look.mat('#FFFFFF', { vertexColors: true }));
+      const rock = new THREE.Mesh(geometry, stoneMaterial(look));
       const z = CLEFT.z + (side * CLEFT.gap) / 2 - inner * size[2];
       rock.position.set(CLEFT.x, groundHeight(CLEFT.x, z) + 0.02, z);
       rock.scale.set(...size);
@@ -183,6 +183,8 @@ export class ForestPond implements World {
     const lip = new THREE.Vector3(front + 0.004, springY - 0.004, CLEFT.z);
     this.water = new Water(source, lip, IMPACT);
     root.add(this.water.group);
+    // Now every stone is where it will stay, close the ones cut at the edge.
+    this.stones.add(edgeCaps(look, this.stones));
 
     // Trees.
     PINES.forEach(([x, z, h], i) => {

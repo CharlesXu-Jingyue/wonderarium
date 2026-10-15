@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { mesh, rand, type Look } from '../kit';
 import type { NavGrid } from '../nav';
 import { P } from './look';
-import { groundHeight, pondInward, pondSdf, WATER } from './terrain';
+import { GRASS, groundHeight, pondInward, pondSdf, WATER } from './terrain';
 
 // A fawn that visits now and then. It steps in through one of the glass
 // walls (the cube cuts it off until it is inside), goes down to the water
@@ -45,6 +45,8 @@ const IN = 0.44;
 const OUT = 0.62;
 /** How far out it settles to graze or rest, so it is never half through the glass. */
 const ROOM = 0.37;
+/** How far above the meadow a drinking spot may stand: off the ridge, onto the low bank. */
+const LOW_BANK = 0.015;
 
 export class Deer {
   readonly root = new THREE.Group();
@@ -172,14 +174,19 @@ export class Deer {
 
   // ---------- planning ----------
 
-  /** A spot on the bank to drink from: where to stand, and the water it faces. */
+  /**
+   * A spot on the bank to drink from: where to stand, and the water it faces.
+   * Only on the low side, where the meadow comes gently down to the water;
+   * a deer would not perch up on the ridge and crane down over the drop.
+   */
   private drinkSpot() {
-    for (let i = 0; i < 40; i++) {
+    for (let i = 0; i < 80; i++) {
       const a = rand(0, Math.PI * 2);
       const p = new THREE.Vector2(0.07 + Math.cos(a) * 0.5, 0.05 + Math.sin(a) * 0.5);
       // Walk in toward the water until just short of it.
       for (let k = 0; k < 80 && pondSdf(p.x, p.y) > 0.048; k++) p.addScaledVector(pondInward(p.x, p.y), 0.008);
       if (Math.abs(p.x) > 0.42 || Math.abs(p.y) > 0.42 || !this.woods.nav.free(p)) continue;
+      if (groundHeight(p.x, p.y) > GRASS + LOW_BANK) continue;
       return p;
     }
     return null;
