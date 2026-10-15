@@ -1,4 +1,4 @@
-// Starting palette from DESIGN.md. Worlds may add their own colours, but
+// Starting palette from docs/DESIGN.md. Worlds may add their own colours, but
 // reaching for these first keeps every world in the same family.
 
 export const palette = {

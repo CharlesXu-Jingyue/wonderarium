@@ -22,7 +22,7 @@ self-sustaining world inside. You watch it more than you play it.
 | Area | Decision |
 |---|---|
 | Platform | Electron + Three.js (macOS first) |
-| Window | Frameless, transparent, 3:2 landscape so the controls sit beside the cube rather than over it. Only the cube and its soft shadow are visible until you hover. Movable, resizable, fullscreen (adds a backdrop that follows the sky). Optional always-on-top. |
+| Window | Frameless, transparent, 11:8, just wide enough for the worlds panel to stand beside the centred cube, with the time bar above it and the tools below. Only the cube and its soft shadow are visible until you hover. Movable, resizable, fullscreen (adds a backdrop that follows the sky). Optional always-on-top. |
 | View | 3D glass cube you can orbit. Damped drag-to-rotate, scroll to zoom, limited tilt (never from below), slow idle drift. |
 | Aesthetic | Soft low-poly, warm and toasty: flat-shaded facets, wood and cream tones with pastel accents, soft shadows. Visual reference: the hamster-cage mock-up shared on 2026-10-14. |
 | First world | Hamster cage |
@@ -130,6 +130,9 @@ walls. The pond is three overlapping circles blended into one rounded shape,
 described by a signed distance, so anything can ask how far it is from the
 water's edge and which way is deeper. Its bed is pale and pebbly in the
 shallows and greener in the middle; steep banks turn from earth to stone.
+Rocks near a wall are cut where the soil ends rather than at the glass, so
+their buried bases never hang past the slab, and each cut is closed with a
+flat face of stone, so they read as solid all the way through.
 
 **Water:** a faceted surface that breathes with small waves and knows how deep
 the water is beneath each point: clear over the shallows, teal over the deep,
@@ -162,8 +165,10 @@ moment standing still to look about, a lie-down, or home, likelier the
 longer it has stayed), and it sometimes stops mid-walk to look around. It
 finds its way on a grid of dry ground clear of rocks, trunks and the log,
 the same kind the hamster uses, and only enters where it can reach the
-water. To drink it lowers its head just until its muzzle meets the
-surface, found by trying the pose rather than chasing it.
+water. It drinks only from the low bank, where the meadow slopes gently
+down to the pond, never from up on the ridge craning over the drop. To
+drink it lowers its head just until its muzzle meets the surface, found by
+trying the pose rather than chasing it.
 
 **Interactions:**
 - *Feed the koi.* Click the water: a pinch of food scatters on the surface

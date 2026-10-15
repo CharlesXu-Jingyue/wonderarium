@@ -6,7 +6,7 @@ A small glass cube sits on your desktop, and inside it a tiny world goes about i
 
 ![The forest pond in its glass cube, with the worlds panel, the clock and the tools showing](docs/images/forest-pond.jpg)
 
-The cube is only ever a boundary. It has no base or furniture of its own: whatever a world holds is inside the glass, and anything that grows past it (a tall pine, a wide rock) is simply cut off there, like a diorama. The design notes in [DESIGN.md](DESIGN.md) tell the longer story of how each world was made.
+The cube is only ever a boundary. It has no base or furniture of its own: whatever a world holds is inside the glass, and anything that grows past it (a tall pine, a wide rock) is simply cut off there, like a diorama. The design notes in [docs/DESIGN.md](docs/DESIGN.md) tell the longer story of how each world was made.
 
 ## Two worlds, so far
 
@@ -118,6 +118,8 @@ The code is small and plainly laid out:
 - `src/worlds/` holds one folder per world, plus a few things they share: a low-poly kit, and a grid for finding paths around obstacles.
 
 Each world gets its own group inside the cube, a read-only view of the clock and the light, and the pointer, and nothing else. Adding one is a new folder and a line in `src/worlds/index.ts`.
+
+Two longer notes live in `docs/`: [DESIGN.md](docs/DESIGN.md), on how each world was made, and [WINDOWS.md](docs/WINDOWS.md), a plan for bringing the box to Windows.
 
 ## How the project keeps to itself
 
