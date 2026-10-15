@@ -26,10 +26,30 @@ const SCALE = 0.0185;
 /** The middle of the attractor's height, raised to the cube's middle. */
 const MID_Z = 24.5;
 const MOTES = 120;
-/** How many sparks a click releases, and how long they keep their own colour. */
+/**
+ * How many sparks a click gathers, and how far apart they start: one point
+ * on screen, but far enough apart that they fray within half a minute.
+ */
 const BURST = 36;
-const BURST_FADE = 14;
+const BURST_GAP = 0.05;
 const BURST_COLOR: [number, number, number] = [0.4, 0.9, 1.0];
+/**
+ * A cloud keeps its colour while it holds together, and lets it go as it
+ * spreads: from this mean distance from its middle (Lorenz units)...
+ */
+const SPREAD_FADE_FROM = 4;
+/** ...to this one, about as scattered as sparks on the attractor ever are. */
+const SPREAD_GONE = 12;
+/** Whatever happens, a cloud is let go after this many seconds. */
+const CLOUD_LIFE = 300;
+/** The colour never goes quicker than this, even when a cloud splits between the wings at once. */
+const FADE_AT_LEAST = 6;
+
+interface Cloud {
+  id: number;
+  members: number[];
+  age: number;
+}
 
 export class LorenzAttractor implements World {
   readonly id = 'lorenz-attractor';
@@ -41,7 +61,12 @@ export class LorenzAttractor implements World {
   /** Lorenz space, turned so the wings open across the usual view. */
   private readonly space = new THREE.Group();
   private readonly state: Float64Array = onAttractor(SPARKS);
+  /** How strongly each spark shows its cloud's colour, 0 to 1. */
   private readonly fresh = new Float32Array(SPARKS);
+  /** Which cloud each spark belongs to, or -1. */
+  private readonly cloudOf = new Int32Array(SPARKS).fill(-1);
+  private clouds: Cloud[] = [];
+  private nextCloud = 0;
   private tails!: THREE.LineSegments;
   private heads!: THREE.Points;
   private readonly owned: { dispose(): void }[] = [];
@@ -191,6 +216,7 @@ export class LorenzAttractor implements World {
       p.copyWithin(3, 0, p.length - 3);
       c.copyWithin(3, 0, c.length - 3);
     }
+    this.watchClouds(dt);
     const h = SPEED * dt;
     for (let n = 0; n < SPARKS; n++) {
       const i = n * 3;
@@ -199,15 +225,45 @@ export class LorenzAttractor implements World {
       this.place(this.state, i, p, o);
       hue(this.state[i], this.state[i + 1], this.state[i + 2], this.rgb);
       const f = this.fresh[n];
-      if (f > 0) {
-        for (let k = 0; k < 3; k++) this.rgb[k] += (BURST_COLOR[k] - this.rgb[k]) * Math.min(1, f * 1.4);
-        this.fresh[n] = Math.max(0, f - dt / BURST_FADE);
-      }
+      if (f > 0) for (let k = 0; k < 3; k++) this.rgb[k] += (BURST_COLOR[k] - this.rgb[k]) * f;
       c.set(this.rgb, o);
       (headPos.array as Float32Array).set(p.subarray(o, o + 3), i);
       (headCol.array as Float32Array).set(this.rgb, i);
     }
     pos.needsUpdate = col.needsUpdate = headPos.needsUpdate = headCol.needsUpdate = true;
+  }
+
+  /** Fade each cloud's colour by how far it has spread, and let go of scattered ones. */
+  private watchClouds(dt: number) {
+    const s = this.state;
+    this.clouds = this.clouds.filter((cloud) => {
+      cloud.age += dt;
+      // Sparks taken into a newer cloud have left this one.
+      cloud.members = cloud.members.filter((n) => this.cloudOf[n] === cloud.id);
+      let cx = 0;
+      let cy = 0;
+      let cz = 0;
+      for (const n of cloud.members) {
+        cx += s[n * 3];
+        cy += s[n * 3 + 1];
+        cz += s[n * 3 + 2];
+      }
+      const count = Math.max(1, cloud.members.length);
+      cx /= count;
+      cy /= count;
+      cz /= count;
+      let spread = 0;
+      for (const n of cloud.members) spread += Math.hypot(s[n * 3] - cx, s[n * 3 + 1] - cy, s[n * 3 + 2] - cz);
+      spread /= count;
+      const t = Math.min(1, Math.max(0, (spread - SPREAD_FADE_FROM) / (SPREAD_GONE - SPREAD_FADE_FROM)));
+      const target = cloud.age > CLOUD_LIFE ? 0 : 1 - t * t * (3 - 2 * t);
+      let f = 0;
+      for (const n of cloud.members) {
+        f = this.fresh[n] = Math.max(target, this.fresh[n] - dt / FADE_AT_LEAST);
+        if (f === 0) this.cloudOf[n] = -1;
+      }
+      return f > 0 && cloud.members.length > 0;
+    });
   }
 
   // ---------- touch ----------
@@ -234,20 +290,29 @@ export class LorenzAttractor implements World {
     return true;
   }
 
-  /** Gather BURST other sparks onto spark `from`, a hair apart, in their own colour. */
+  /**
+   * Gather BURST other sparks onto spark `from`, close enough to look like
+   * one, into a cloud of their own colour. The count of sparks never
+   * changes: these leave wherever they were.
+   */
   private burst(from: number) {
     const s = this.state;
     const p = (this.tails.geometry.getAttribute('position') as THREE.BufferAttribute).array as Float32Array;
+    const cloud: Cloud = { id: this.nextCloud++, members: [from], age: 0 };
+    this.cloudOf[from] = cloud.id;
     this.fresh[from] = 1;
     for (let b = 0; b < BURST; b++) {
       const n = Math.floor(Math.random() * SPARKS);
-      if (n === from) continue;
-      for (let k = 0; k < 3; k++) s[n * 3 + k] = s[from * 3 + k] + rand(-1e-3, 1e-3);
+      if (n === from || this.cloudOf[n] === cloud.id) continue;
+      for (let k = 0; k < 3; k++) s[n * 3 + k] = s[from * 3 + k] + rand(-BURST_GAP, BURST_GAP);
+      this.cloudOf[n] = cloud.id;
       this.fresh[n] = 1;
+      cloud.members.push(n);
       // Start its tail afresh at the burst, so no streak jumps across.
       const o = n * TAIL * 3;
       for (let k = 0; k < TAIL; k++) p.copyWithin(o + k * 3, from * TAIL * 3, from * TAIL * 3 + 3);
     }
+    this.clouds.push(cloud);
   }
 
   dispose() {

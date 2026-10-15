@@ -38,7 +38,7 @@ Now and then a small spotted fawn steps in through the glass. It might go down t
 
 ![The Lorenz attractor glowing in the cube at night, amber on one wing and violet on the other](docs/images/lorenz-attractor.jpg)
 
-- **Release a cloud.** Click near the sparks and a small cloud of new ones sets off from a single point in cyan. For a few seconds they travel as one, then they fray and scatter over both wings, sensitive dependence on initial conditions in the space of a breath.
+- **Gather a cloud.** Click near the sparks and three dozen of them leave wherever they were and gather, in cyan, onto the one you picked, close enough to look like a single bright spark. For a while they travel as one; then, somewhere between a few seconds and half a minute depending on where they started, they fray into a streak and scatter over both wings, keeping their colour until they are fully mixed back in. It is sensitive dependence on initial conditions, slowed down enough to watch.
 
 ## The box itself
 

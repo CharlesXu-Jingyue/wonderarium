@@ -212,10 +212,17 @@ desktop, where purely additive light would vanish. It burns a little
 brighter at night.
 
 **Interaction:** click near the sparks and the one nearest the line of sight
-releases a cloud: three dozen others gather onto it a thousandth of a unit
-apart, in a cyan that fades over about fifteen seconds. They travel
-together, then fray and scatter over both wings, which is the whole point of
-the system made visible.
+gathers a cloud: three dozen others leave wherever they were (the count
+never changes) and land within a twentieth of a unit of it, one point on
+screen. They travel together, then fray and scatter over both wings, which
+is the whole point of the system made visible. Nearby paths part by about a
+factor of e per Lorenz time unit, so at this pace the fraying shows after a
+few seconds to half a minute, depending on where on the attractor the cloud
+began. The cloud keeps its cyan while it holds together and lets it go as
+its mean distance from its own middle grows from 4 to 12 units, about as
+scattered as sparks on the attractor ever are, never faster than over six
+seconds (when a cloud splits between the wings at once) and never longer
+than five minutes. A spark taken into a newer cloud leaves its old one.
 
 **Remembered:** nothing; it never needs to be.
 
