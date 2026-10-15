@@ -1,5 +1,7 @@
 import { palette } from '../palette';
+import type { Backdrop } from '../shell/lighting';
 import { HamsterCage } from './hamster';
+import { LorenzAttractor } from './lorenz';
 import { ForestPond } from './pond';
 import type { World } from './world';
 
@@ -10,10 +12,34 @@ export interface WorldEntry {
   name: string;
   /** Colour for the placeholder card before a thumbnail exists. */
   accent: string;
+  /** Behind the box in fullscreen and in a browser, by day and by night. */
+  backdrop: Backdrop;
   create(): World;
 }
 
 export const WORLDS: WorldEntry[] = [
-  { id: 'hamster-cage', name: 'Hamster Cage', accent: palette.peach, create: () => new HamsterCage() },
-  { id: 'forest-pond', name: 'Forest Pond', accent: palette.sage, create: () => new ForestPond() },
+  {
+    id: 'hamster-cage',
+    name: 'Hamster Cage',
+    accent: palette.peach,
+    // Warm wood and cream, a lamp-lit room at night.
+    backdrop: { day: ['#E2CBB3', '#C5A68A'], night: ['#3E3A5A', '#5F5675'] },
+    create: () => new HamsterCage(),
+  },
+  {
+    id: 'forest-pond',
+    name: 'Forest Pond',
+    accent: palette.sage,
+    // Soft green shade by day, deep blue-green water at night.
+    backdrop: { day: ['#BCCBB2', '#8FA58E'], night: ['#1F3238', '#36504D'] },
+    create: () => new ForestPond(),
+  },
+  {
+    id: 'lorenz-attractor',
+    name: 'Lorenz Attractor',
+    accent: palette.night,
+    // Slate dusk by day, nearly black space at night, so the glow carries.
+    backdrop: { day: ['#6A6F9E', '#4D5280'], night: ['#14152A', '#262947'] },
+    create: () => new LorenzAttractor(),
+  },
 ];

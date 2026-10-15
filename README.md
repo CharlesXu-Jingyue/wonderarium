@@ -8,7 +8,7 @@ A small glass cube sits on your desktop, and inside it a tiny world goes about i
 
 The cube is only ever a boundary. It has no base or furniture of its own: whatever a world holds is inside the glass, and anything that grows past it (a tall pine, a wide rock) is simply cut off there, like a diorama. The design notes in [docs/DESIGN.md](docs/DESIGN.md) tell the longer story of how each world was made.
 
-## Two worlds, so far
+## Three worlds, so far
 
 **The hamster cage.** A wooden tray of shavings with a deep wheel, a plank cottage with an arched door and a round window, a water bottle, a food bowl, a chew log and a block of cheese. The hamster lives by a handful of needs that rise over time, so it eats, drinks, grooms, digs, wanders and runs when it feels like it, and it leans nocturnal: sleepy in the afternoon, keen on the wheel after dark. When it goes to bed it walks in through the door and disappears behind the wall, and at night the cottage windows glow.
 
@@ -34,18 +34,24 @@ Now and then a small spotted fawn steps in through the glass. It might go down t
 
 ![The forest pond at night, lit by the moon](docs/images/pond-at-night.jpg)
 
+**The Lorenz attractor.** The abstract one, with no floor and nothing alive, only light in empty space. Edward Lorenz wrote down three small equations in 1963 as a sketch of air rolling over a warm surface, and found that two starting points a hair apart soon go entirely different ways, which is how chaos got its butterfly. Here hundreds of sparks follow those equations, each trailing a short comet's tail, amber on one wing and violet on the other and whiter where the wings cross. Beneath them a few faint threads of one long path sketch the shape they are all drawn into, and loose motes drift and twinkle in the space around it. It moves slowly, and glows a little brighter at night.
+
+![The Lorenz attractor glowing in the cube at night, amber on one wing and violet on the other](docs/images/lorenz-attractor.jpg)
+
+- **Release a cloud.** Click near the sparks and a small cloud of new ones sets off from a single point in cyan. For a few seconds they travel as one, then they fray and scatter over both wings, sensitive dependence on initial conditions in the space of a breath.
+
 ## The box itself
 
 **Time follows yours.** The box keeps your local time, and one sun and moon serve every world: warm and low at dawn and dusk, soft lavender at night, never quite dark. Click the clock to shift it, speed it up (up to 600 times) to watch a day go by, or sync it back to real time. The light belongs to the room, not the cube, so as you turn the cube the shadows sweep across what is inside it.
 
 **Controls only when you want them.** The window has no frame and a transparent background, so the cube seems to float on your desktop. Move the pointer over it and the controls fade in:
 
-- the **Worlds** panel on the left, with a picture of each world;
-- a pill at the top right with the clock and the minimise, fullscreen and close buttons (drag the pill to move the window);
+- the **Worlds** panel on the left, with a still picture of each world, taken the first time you open it;
+- a pill at the top right with the clock and the minimise, fullscreen and close buttons;
 - round tools along the bottom: reset the view, pause, take a screenshot, and settings (keep the window on top, drift slowly when idle, open the screenshots folder);
 - a corner at the bottom right to resize.
 
-Drag anywhere on the cube to turn it and scroll to zoom. Left alone for a while, it drifts slowly round on its own.
+Drag any bare part of the controls (the pill, the panel, the space between the tools) to move the window. Drag anywhere on the cube to turn it and scroll to zoom. Left alone for a while, it drifts slowly round on its own. In fullscreen, and in the web version, the box sits on a backdrop in its world's own colours (warm wood for the hamster, green shade for the pond, deep slate for the attractor), and the backdrop follows the sky from day to night.
 
 **Everything is remembered.** Which world you were looking at, where the furniture stands, how the hamster was feeling, where the lily pads drifted and the clock settings all carry over to next time.
 

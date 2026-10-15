@@ -27,6 +27,19 @@ const KEYS: Keyframe[] = [
     backdropTop: '#D2C1AF', backdropBottom: '#B5A190' },
 ];
 
+/**
+ * A world's own backdrop for fullscreen and the browser: a top and bottom
+ * colour by day and by night. The sky still shows through a little, so
+ * dawn and dusk warm every world.
+ */
+export interface Backdrop {
+  day: [top: string, bottom: string];
+  night: [top: string, bottom: string];
+}
+
+/** How much of the backdrop is the world's own colour rather than the sky's. */
+const THEME = 0.72;
+
 export interface LightState {
   /** 0 at night, 1 in full daylight. */
   daylight: number;
@@ -54,6 +67,8 @@ export class Lighting {
     keyColor: new THREE.Color(),
   };
   readonly backdrop = { top: new THREE.Color(), bottom: new THREE.Color() };
+  /** The current world's backdrop colours, if it has its own. */
+  theme?: Backdrop;
 
   private readonly tmp = { a: new THREE.Color(), b: new THREE.Color() };
 
@@ -118,11 +133,18 @@ export class Lighting {
     this.blend(elevation, (f) => f.sky, this.hemi.color);
     this.blend(elevation, (f) => f.ground, this.hemi.groundColor);
     this.hemi.intensity = this.blendNumber(elevation, (f) => f.hemi);
-    this.blend(elevation, (f) => f.backdropTop, this.backdrop.top);
-    this.blend(elevation, (f) => f.backdropBottom, this.backdrop.bottom);
-
     this.state.hours = hours;
     this.state.daylight = smoothstep(-0.12, 0.25, elevation);
     this.state.keyColor.copy(this.key.color);
+
+    this.blend(elevation, (f) => f.backdropTop, this.backdrop.top);
+    this.blend(elevation, (f) => f.backdropBottom, this.backdrop.bottom);
+    if (this.theme) {
+      const { day, night } = this.theme;
+      const d = this.state.daylight;
+      const { a, b } = this.tmp;
+      this.backdrop.top.lerp(a.set(night[0]).lerp(b.set(day[0]), d), THEME);
+      this.backdrop.bottom.lerp(a.set(night[1]).lerp(b.set(day[1]), d), THEME);
+    }
   }
 }

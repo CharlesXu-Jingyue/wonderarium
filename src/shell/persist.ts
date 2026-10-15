@@ -12,6 +12,8 @@ export interface SaveFile {
   worlds?: Record<string, unknown>;
   /** Small JPEG data URLs for the worlds panel. */
   thumbs?: Record<string, string>;
+  /** Which way the thumbnails were taken; older ones are retaken. */
+  thumbStyle?: number;
 }
 
 export async function loadSave(): Promise<SaveFile> {

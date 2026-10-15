@@ -12,6 +12,8 @@ const FIT_RADIUS = 0.98; // cube corners plus a little room for its shadow
 const IDLE_BEFORE_DRIFT = 10; // seconds without input before the slow orbit
 const HOME_POLAR = 1.08;
 const HOME_AZIMUTH = Math.PI / 4;
+/** The still on a world's card: turned a little off the corner, a touch closer, at midday. */
+const SNAP = { azimuth: HOME_AZIMUTH + 0.32, polar: 1.02, zoom: 0.86, hours: 13 };
 /** Where the glass cuts off anything that grows past it. */
 const WALL = 0.497;
 
@@ -34,6 +36,9 @@ export class Stage {
   private pressStart = 0;
   private pressAt = { x: 0, y: 0 };
   private worldHasPress = false;
+  private readonly snapCamera = new THREE.PerspectiveCamera(FOV, 1, 0.1, 50);
+  /** The light as last drawn, to put back after a snapshot. */
+  private lastLight = { hours: 12, turn: 0 };
   private readonly raycaster = new THREE.Raycaster();
   private readonly ndc = new THREE.Vector2();
   // Six planes facing inward: the cube is the edge of every world, so a tree
@@ -86,12 +91,34 @@ export class Stage {
     this.homing = 0.9;
   }
 
+  /**
+   * A still of the world for its card, always from the same angle and in
+   * the same midday light, whatever the view and the hour are right now.
+   */
+  snapshot(width: number, height: number): HTMLCanvasElement {
+    const cam = this.snapCamera;
+    cam.aspect = this.camera.aspect;
+    cam.updateProjectionMatrix();
+    cam.position.setFromSphericalCoords(this.fitDistance * SNAP.zoom, SNAP.polar, SNAP.azimuth).add(this.controls.target);
+    cam.lookAt(this.controls.target);
+    this.lighting.update(SNAP.hours, SNAP.azimuth - HOME_AZIMUTH);
+    this.cube.update(this.lighting.state);
+    this.wallIn();
+    const background = `#${this.lighting.backdrop.bottom.getHexString()}`;
+    const out = this.capture({ width, height, scale: 0.92, background }, cam);
+    // Back to the room as it is, and draw it so the snapshot never shows.
+    this.lighting.update(this.lastLight.hours, this.lastLight.turn);
+    this.cube.update(this.lighting.state);
+    this.renderer.render(this.scene, this.camera);
+    return out;
+  }
+
   /** Render once and copy the frame, optionally cropped to a centred box. */
-  capture(crop?: { width: number; height: number; scale: number; background?: string }): HTMLCanvasElement {
+  capture(crop?: { width: number; height: number; scale: number; background?: string }, view: THREE.Camera = this.camera): HTMLCanvasElement {
     // Render onto an opaque background when asked: copies of a transparent
     // WebGL canvas come out black where nothing was drawn.
     if (crop?.background) this.renderer.setClearColor(crop.background, 1);
-    this.renderer.render(this.scene, this.camera);
+    this.renderer.render(this.scene, view);
     this.renderer.setClearColor(0x000000, 0);
     const src = this.renderer.domElement;
     const out = document.createElement('canvas');
@@ -224,6 +251,7 @@ export class Stage {
     const offset = this.camera.position.clone().sub(this.controls.target);
     const turn = Math.atan2(offset.x, offset.z) - HOME_AZIMUTH;
     this.lighting.update(hours, turn);
+    this.lastLight = { hours, turn };
     this.cube.update(this.lighting.state);
     this.wallIn();
     this.renderer.render(this.scene, this.camera);

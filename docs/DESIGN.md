@@ -22,7 +22,7 @@ self-sustaining world inside. You watch it more than you play it.
 | Area | Decision |
 |---|---|
 | Platform | Electron + Three.js (macOS first) |
-| Window | Frameless, transparent, 11:8, just wide enough for the worlds panel to stand beside the centred cube, with the time bar above it and the tools below. Only the cube and its soft shadow are visible until you hover. Movable, resizable, fullscreen (adds a backdrop that follows the sky). Optional always-on-top. |
+| Window | Frameless, transparent, 11:8, just wide enough for the worlds panel to stand beside the centred cube, with the time bar above it and the tools below. Only the cube and its soft shadow are visible until you hover. Movable, resizable, fullscreen (adds a backdrop in the world's own colours that follows the sky). Optional always-on-top. |
 | View | 3D glass cube you can orbit. Damped drag-to-rotate, scroll to zoom, limited tilt (never from below), slow idle drift. |
 | Aesthetic | Soft low-poly, warm and toasty: flat-shaded facets, wood and cream tones with pastel accents, soft shadows. Visual reference: the hamster-cage mock-up shared on 2026-10-14. |
 | First world | Hamster cage |
@@ -33,7 +33,7 @@ self-sustaining world inside. You watch it more than you play it.
 
 ## Shell
 
-- **Chrome.** Hidden until you hover. Then four things fade in: a Worlds panel on the left with a picture card per world; a pill at the top right with the sky icon, the box's time (click it for shift, speed and sync) and minimize, fullscreen and close (drag the pill to move the window); round tools along the bottom (reset view, pause, screenshot, settings); and a resize corner. Settings holds keep-on-top, drift-when-idle and the screenshots folder.
+- **Chrome.** Hidden until you hover. Then four things fade in: a Worlds panel on the left with a card per world, showing a still taken once, the first time the world is opened, from a fixed angle a little off the corner and a touch closer than the usual view, always in midday light; a pill at the top right with the sky icon, the box's time (click it for shift, speed and sync) and minimize, fullscreen and close; round tools along the bottom (reset view, pause, screenshot, settings); and a resize corner. Settings holds keep-on-top, drift-when-idle and the screenshots folder. Any bare part of the pill, the panel, the tools or a popover moves the window.
 - **Cube.** Only the boundary: faintly blue glass that looks thick at the edges (a soft bluish rim and a crisp highlight line), brighter at grazing angles (Fresnel), and it mirrors two sparse room lights (a tall window and a small warm lamp, fixed relative to the viewer), so reflections slide across the panes as the cube turns. It has no base or contents of its own, but it is the edge of every world: whatever grows past the glass (a tall pine, a wide rock) is cut off there, shadow and all, like a diorama. A soft contact shadow under it makes it seem to rest on the desktop.
 - **Lighting.** A sun or moon light whose angle and colour follow the world clock: warm and low at dawn and dusk, lavender at night, never black. The light belongs to the room, not the cube: turning the cube turns it under a fixed light, so shadows sweep across the contents (only turning around the vertical axis counts; the cube never tips). A tiny warm glow from the hamster house at night is planned.
 - **Runtime.** Fixed-step simulation, decoupled from rendering. It keeps running
@@ -186,6 +186,39 @@ trying the pose rather than chasing it.
 
 **Remembered:** where the lily pads have drifted, and where the frog sat.
 
+## Lorenz attractor (world #3)
+
+The abstract one: no floor, no creatures, only light in empty space. It is
+here for the same reason the pond is, something to rest your eyes on, but
+what it rests them on is a piece of mathematics.
+
+**The flow:** the Lorenz equations (σ = 10, ρ = 28, β = 8/3), integrated with
+fourth-order Runge-Kutta, slowly: a tenth of a Lorenz time unit per second,
+so a loop round a wing takes several seconds. The wings spread along x + y,
+so the attractor is turned to lay that direction across the cube's diagonal
+facing the usual view, and scaled until its widest reach sits just inside
+the glass.
+
+**The light:** 640 sparks, each with a tail of its last few dozen places,
+sampled every third step and fading toward the end. They are amber on one
+wing and violet on the other, whiter where the wings cross and bluer in the
+tight turns near each eye. Under them run two faint threads of one long
+trajectory, still, sketching the shape the sparks are drawn into, and about
+a hundred motes drift and twinkle in the space around. Everything glows
+without a lamp: dots are soft sprites with a bright core in a wide halo, and
+both dots and lines write premultiplied colour with less alpha than colour,
+so they add light on a dark backdrop yet still show as a tint over a bright
+desktop, where purely additive light would vanish. It burns a little
+brighter at night.
+
+**Interaction:** click near the sparks and the one nearest the line of sight
+releases a cloud: three dozen others gather onto it a thousandth of a unit
+apart, in a cyan that fades over about fifteen seconds. They travel
+together, then fray and scatter over both wings, which is the whole point of
+the system made visible.
+
+**Remembered:** nothing; it never needs to be.
+
 ## Later worlds (backlog)
 
-Aquarium · tiny island · tree house · solar system · Lorenz attractor
+Aquarium · tiny island · tree house · solar system

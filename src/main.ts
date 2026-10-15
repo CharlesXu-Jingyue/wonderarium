@@ -13,8 +13,9 @@ import type { World } from './worlds/world';
 
 const STEP = 1 / 60;
 const MAX_FRAME = 0.25; // after a long pause, don't try to catch up
-const THUMB_AFTER = 3; // seconds into a world before its card picture is taken
-const THUMB_EVERY = 120; // then refreshed now and then, so it follows the sky
+const THUMB_AFTER = 4; // seconds into a world before its card picture is taken
+/** Card pictures are stills from a fixed angle; earlier, live ones are retaken. */
+const THUMB_STYLE = 2;
 
 function disposeTree(root: THREE.Object3D) {
   root.traverse((o) => {
@@ -34,16 +35,23 @@ async function start() {
   }
   const save = await loadSave();
   save.worlds ??= {};
+  if (save.thumbStyle !== THUMB_STYLE) save.thumbs = {};
   save.thumbs ??= {};
   const clock = new WorldClock(save.clock);
   const stage = new Stage(document.getElementById('stage') as HTMLCanvasElement);
   stage.drift = save.settings?.drift ?? true;
+
+  // The fullscreen backdrop follows the sky, in the world's own colours.
+  const rootStyle = document.documentElement.style;
+  let backdropTick = 0;
 
   let world!: World;
   let thumbIn = THUMB_AFTER; // seconds until the next card picture
   const mount = (id: string | undefined) => {
     const entry = WORLDS.find((w) => w.id === id) ?? WORLDS[0];
     world = entry.create();
+    stage.lighting.theme = entry.backdrop;
+    backdropTick = 1; // change the backdrop with the world, not a second later
     world.mount(
       { root: stage.worldRoot, bounds: INNER_BOUNDS, clock, light: stage.lighting.state },
       save.worlds![world.id],
@@ -68,6 +76,7 @@ async function start() {
     settings: { drift: stage.drift },
     worlds: { ...save.worlds, [world.id]: world.serialize?.() },
     thumbs: save.thumbs,
+    thumbStyle: THUMB_STYLE,
   });
   const saver = new Saver(snapshot);
 
@@ -97,9 +106,6 @@ async function start() {
   });
   window.setInterval(() => chrome.refresh(), 250);
 
-  // Fullscreen backdrop follows the sky.
-  const rootStyle = document.documentElement.style;
-  let backdropTick = 0;
 
   let last = performance.now();
   let acc = 0;
@@ -116,13 +122,10 @@ async function start() {
     world.render?.(acc / STEP);
     stage.render(dt, clock.hours);
 
-    // Take the world's card picture once it has settled in, then refresh it.
-    if ((thumbIn -= dt) <= 0) {
-      thumbIn = THUMB_EVERY;
-      const backdrop = `#${stage.lighting.backdrop.bottom.getHexString()}`;
-      save.thumbs![world.id] = stage
-        .capture({ width: 224, height: 160, scale: 0.92, background: backdrop })
-        .toDataURL('image/jpeg', 0.82);
+    // Take the world's card picture once it has settled in, the first time
+    // it is opened; after that the card keeps it.
+    if (!save.thumbs![world.id] && (thumbIn -= dt) <= 0) {
+      save.thumbs![world.id] = stage.snapshot(224, 160).toDataURL('image/jpeg', 0.85);
       chrome.renderWorlds();
       saver.soon();
     }
