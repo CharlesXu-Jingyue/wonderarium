@@ -106,6 +106,9 @@ export class Chrome {
     };
     document.addEventListener('pointermove', wake);
     document.addEventListener('pointerdown', wake);
+    // A finger scrolling the worlds sends no pointer moves once the scroll
+    // takes over, so scrolling itself keeps the controls up.
+    document.addEventListener('scroll', wake, { capture: true, passive: true });
     document.documentElement.addEventListener('mouseleave', () => void left());
 
     // An open panel stays while the pointer is on it or on the button that

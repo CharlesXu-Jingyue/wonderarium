@@ -142,11 +142,20 @@ svg {
   letter-spacing: 0.01em;
 }
 
+/* The cards scroll when there are more than fit, without a scrollbar, and
+   a scroll that reaches the end stays in the list rather than moving the page. */
 .world-list {
   display: flex;
   flex-direction: column;
   gap: 7px;
+  min-height: 0;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+
+.world-list::-webkit-scrollbar {
+  display: none;
 }
 
 .world-card {
@@ -504,9 +513,18 @@ body.fullscreen .resize {
     display: none;
   }
 
+  /* A row too long for a phone: swipe it sideways. */
   body.browser .world-list {
     flex-direction: row;
-    overflow: visible;
+    overflow-x: auto;
+    overflow-y: hidden;
+    touch-action: pan-x;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+  }
+
+  body.browser .world-card {
+    scroll-snap-align: start;
   }
 
   body.browser .world-card {
