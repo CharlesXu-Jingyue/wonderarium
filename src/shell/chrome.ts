@@ -37,6 +37,8 @@ export interface ChromeHooks {
 }
 
 const HIDE_AFTER_MS = 2200;
+/** How long an open panel waits once the pointer has wandered off it. */
+const PANEL_LINGER_MS = 2500;
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
@@ -105,6 +107,21 @@ export class Chrome {
     document.addEventListener('pointermove', wake);
     document.addEventListener('pointerdown', wake);
     document.documentElement.addEventListener('mouseleave', () => void left());
+
+    // An open panel stays while the pointer is on it or on the button that
+    // opened it, and closes by itself once the pointer has been elsewhere a
+    // little while (or is busy with something it is dragging).
+    let nearPanel = 0;
+    const near = (e: Event) => {
+      const t = e.target as Element | null;
+      if (t?.closest?.('.popover, #time-btn, #settings-btn')) nearPanel = performance.now();
+    };
+    document.addEventListener('pointermove', near);
+    document.addEventListener('pointerdown', near);
+    window.setInterval(() => {
+      if (this.busy) nearPanel = performance.now();
+      if (this.anyPopoverOpen() && performance.now() - nearPanel > PANEL_LINGER_MS) this.closePopovers();
+    }, 300);
   }
 
   private anyPopoverOpen() {

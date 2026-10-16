@@ -278,8 +278,7 @@ svg {
    that answer a click. */
 .topbar,
 .worlds,
-.tools,
-.popover {
+.tools {
   -webkit-app-region: drag;
 }
 
