@@ -33,7 +33,7 @@ self-sustaining world inside. You watch it more than you play it.
 
 ## Shell
 
-- **Chrome.** Hidden until you hover. Then four things fade in: a Worlds panel on the left with a card per world, showing a still taken once, the first time the world is opened, from a fixed angle a little off the corner and a touch closer than the usual view, always in midday light; a pill at the top right with the sky icon, the box's time (click it for shift, speed and sync) and minimize, fullscreen and close; round tools along the bottom (reset view, pause, screenshot, settings); and a resize corner. Settings holds keep-on-top, drift-when-idle and the screenshots folder. Any bare part of the pill, the panel, the tools or a popover moves the window.
+- **Chrome.** Hidden until you hover. Then four things fade in: a Worlds panel on the left with a card per world, showing a still taken once, the first time the world is opened, from a fixed angle a little off the corner and a touch closer than the usual view, always in midday light; a pill at the top right with the sky icon, the box's time (click it for shift, speed and sync) and minimize, fullscreen and close; round tools along the bottom (reset view, pause, screenshot, settings); and a resize corner. Settings holds keep-on-top, drift-when-idle and the screenshots folder. Any bare part of the pill, the worlds panel or the tools moves the window. The time and settings panels close by themselves once the pointer has been off them (and off the button that opened them) for a couple of seconds.
 - **Cube.** Only the boundary: faintly blue glass that looks thick at the edges (a soft bluish rim and a crisp highlight line), brighter at grazing angles (Fresnel), and it mirrors two sparse room lights (a tall window and a small warm lamp, fixed relative to the viewer), so reflections slide across the panes as the cube turns. It has no base or contents of its own, but it is the edge of every world: whatever grows past the glass (a tall pine, a wide rock) is cut off there, shadow and all, like a diorama. Six planes cut at the panes, twelve more across the edges and eight across the corners, so nothing pokes out past the glass's rounded edges and corners either. A soft contact shadow under it makes it seem to rest on the desktop.
 - **Lighting.** A sun or moon light whose angle and colour follow the world clock: warm and low at dawn and dusk, lavender at night, never black. The light belongs to the room, not the cube: turning the cube turns it under a fixed light, so shadows sweep across the contents (only turning around the vertical axis counts; the cube never tips). A tiny warm glow from the hamster house at night is planned.
 - **Runtime.** Fixed-step simulation, decoupled from rendering. It keeps running
@@ -293,6 +293,66 @@ way up; fine specks drift down and start again under the surface.
 - *Click the sand:* a string of bubbles rises from the spot.
 
 **Remembered:** nothing; the jellies start afresh, spread out, each time.
+
+## Loft (world #5)
+
+An interior, warm and cosy, after a reference of a double-height loft whose
+light is mostly hidden behind stairs and furniture.
+
+**The room:** a slab of planked floor, cut away at the glass like the other
+worlds, and two cream walls at the back. A mezzanine bedroom sits over the
+back-left at about two and a half metres (one metre is 0.185 units, so the
+loft is about five metres a side), planked on top, plaster beneath, edged
+with a wooden beam and a glass railing, held up at its open corner by a
+slim post. The stairs turn in the back-right corner, as in the reference,
+floating all the way: open treads rise from the floor beside the right-hand
+glass to a landing slab fixed into the corner, and more climb the back wall
+to the mezzanine, high enough that a deep, low sofa tucks in
+beneath them against the wall, with a round table (a mug, a book) on a rug
+before it. Dark handrails on posts follow both flights. Under the mezzanine,
+the kitchen, set out from the back corner far enough that the fridge door
+swings clear of the desk (a tall plant fills the corner): the fridge, then a
+dark counter with sink and cooktop along the left wall under a floating
+shelf of jars, low enough to reach, and a wooden bar reaching out into the room with two stools; and a desk against the back wall
+(a monitor, a lamp, a chair, a shelf of books). The walls stand
+on the floor rather than reaching into the slab, where their faces would
+share planes with its sides and flicker. Upstairs (the mezzanine reaches a little out over the sofa's end), a low
+bed with linen, a sage throw and pillows, two nightstands, a green rug; a
+big beige bean bag, slumped with a raised back and a hollow to sink into, a
+yellow pillow in it, on a round sage rug between the bed and a low, deep
+bookshelf along the back wall, its hollow turned between the shelf and the
+top of the stairs, with a
+model ship (three masts, pale sails) on top beside a globe lamp and a plant. Pictures of low hills under a warm sky; potted plants about the room;
+pothos trailing from planters over the mezzanine's edges, swaying a little.
+
+**The light:** fixtures, each a bundle of real lights (area lights for the
+strips, point lights for lamps), glowing surfaces where a bulb or strip
+shows, and soft glows painted where its light falls. The strips under the
+stairs show as a bright line under each nosing, a wash down the back wall
+beneath the upper treads and the landing, a little light spilling onto each
+tread below and a soft pool on the floor beneath the lower flight, with an area light under the upper flight down onto the sofa;
+under the mezzanine's edge and the kitchen shelf, as area lights down onto
+the bar, the desk and the counter; under the sofa and the
+bed, as light escaping round their bases. A desk lamp and the monitor (the
+one cool light among the warm) and a globe lamp by the bed, with a second
+on the bookshelf. Each fixture keeps its own hours: the strips from dusk to
+dawn, the desk from evening until half past eleven, the bedside lamp late
+evening until a little after midnight. Each comes on in its own moment and
+eases in and out.
+
+**Night:** the room's shared night light is never dark, which suits a pond
+but not a home after dark. The loft takes most of it back with a negative
+hemisphere light of the same colours, and adds a warm ambient bounce that
+rises with how many of its lights are on, so its own lamps do the lighting.
+
+**Life:** steam curls from the mug, dust drifts and shows in the lamplight,
+the pothos sways.
+
+**Interaction:** a click on any fixture (lamps, the monitor, the stairs, the
+sofa, the bed, the kitchen shelf, the mezzanine's edge; the thin ones have
+larger invisible handles) switches it, until its own hours next change.
+
+**Remembered:** nothing.
 
 ## Later worlds (backlog)
 

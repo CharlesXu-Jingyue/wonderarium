@@ -2,6 +2,7 @@ import { palette } from '../palette';
 import type { Backdrop } from '../shell/lighting';
 import { JellyfishTank } from './aquarium';
 import { HamsterCage } from './hamster';
+import { Loft } from './loft';
 import { LorenzAttractor } from './lorenz';
 import { ForestPond } from './pond';
 import type { World } from './world';
@@ -50,5 +51,13 @@ export const WORLDS: WorldEntry[] = [
     // Deep ocean blue by day, nearly black at night, so the glow carries.
     backdrop: { day: ['#26335F', '#18214A'], night: ['#090D22', '#111733'] },
     create: () => new JellyfishTank(),
+  },
+  {
+    id: 'loft',
+    name: 'Loft',
+    accent: palette.wood,
+    // Warm taupe by day, a deep brown dusk at night, like a room lit by lamps.
+    backdrop: { day: ['#DCC6AD', '#BFA388'], night: ['#2E2420', '#4A3A31'] },
+    create: () => new Loft(),
   },
 ];

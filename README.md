@@ -8,7 +8,7 @@ A small glass cube sits on your desktop, and inside it a tiny world goes about i
 
 The cube is only ever a boundary. It has no base or furniture of its own: whatever a world holds is inside the glass, and anything that grows past it (a tall pine, a wide rock) is simply cut off there, like a diorama. The design notes in [docs/DESIGN.md](docs/DESIGN.md) tell the longer story of how each world was made.
 
-## Four worlds, so far
+## Five worlds, so far
 
 **The hamster cage.** A wooden tray of shavings with a deep wheel, a plank cottage with an arched door and a round window, a water bottle, a food bowl, a chew log and a block of cheese. The hamster lives by a handful of needs that rise over time, so it eats, drinks, grooms, digs, wanders and runs when it feels like it, and it leans nocturnal: sleepy in the afternoon, keen on the wheel after dark. When it goes to bed it walks in through the door and disappears behind the wall, and at night the cottage windows glow.
 
@@ -47,6 +47,12 @@ Now and then a small spotted fawn steps in through the glass. It might go down t
 - **Rouse one.** Click a jelly and it glows a little brighter and beats its way upward for a few quick pulses before settling back into its own pace.
 - **Make bubbles.** Click the sand and a string of bubbles rises from the spot.
 
+**The loft.** A home, warm and lived in: a double-height room with a bedroom on a mezzanine, after a reference whose light is mostly hidden. Floating stairs turn in the back corner, rising beside the glass to a landing and then climbing the back wall to the mezzanine, and the sofa tucks in beneath them, with a round table on a rug before it. Under the mezzanine, a dark kitchen runs along the other wall, the fridge at its back end and a wooden bar with two stools reaching into the room, and a desk with a monitor stands against the back wall. Upstairs, a low bed, a big beige bean bag with a yellow pillow, turned toward a low, deep bookshelf with a model ship on top, a globe lamp, and pothos trailing over the glass railing. By day the sun falls in through the open top. As evening comes the loft's own lights come on, one by one: strips hidden under each stair tread, the mezzanine's edge, the sofa, the bed and the kitchen shelf, so that mostly what you see is the glow they throw on the wall and floor; then a desk lamp and the monitor, and later the lamp by the bed. Someone works late at the desk, shuts it down before midnight and reads in bed a while longer. Steam curls from a mug on the table and dust drifts in the lamplight.
+
+![The loft at night, warm light under the stairs, the mezzanine and the sofa, a lamp lit by the bed](docs/images/loft.jpg)
+
+- **Switch a light.** Click a lamp, the monitor, the stairs, the sofa, the bed, the kitchen shelf or the edge of the mezzanine to switch its light. It stays that way until its own hours next change.
+
 ## The box itself
 
 **Time follows yours.** The box keeps your local time, and one sun and moon serve every world: warm and low at dawn and dusk, soft lavender at night, never quite dark. Click the clock to shift it, speed it up (up to 600 times) to watch a day go by, or sync it back to real time. The light belongs to the room, not the cube, so as you turn the cube the shadows sweep across what is inside it.
@@ -58,7 +64,7 @@ Now and then a small spotted fawn steps in through the glass. It might go down t
 - round tools along the bottom: reset the view, pause, take a screenshot, and settings (keep the window on top, drift slowly when idle, open the screenshots folder);
 - a corner at the bottom right to resize.
 
-Drag any bare part of the controls (the pill, the panel, the space between the tools) to move the window. Drag anywhere on the cube to turn it and scroll to zoom. Left alone for a while, it drifts slowly round on its own. In fullscreen, and in the web version, the box sits on a backdrop in its world's own colours (warm wood for the hamster, green shade for the pond, deep slate for the attractor, ocean blue for the tank), and the backdrop follows the sky from day to night.
+Drag any bare part of the controls (the pill, the panel, the space between the tools) to move the window. Drag anywhere on the cube to turn it and scroll to zoom. Left alone for a while, it drifts slowly round on its own. In fullscreen, and in the web version, the box sits on a backdrop in its world's own colours (warm wood for the hamster, green shade for the pond, deep slate for the attractor, ocean blue for the tank, warm taupe for the loft), and the backdrop follows the sky from day to night.
 
 **Everything is remembered.** Which world you were looking at, where the furniture stands, how the hamster was feeling, where the lily pads drifted and the clock settings all carry over to next time.
 
