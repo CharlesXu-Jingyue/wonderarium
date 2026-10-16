@@ -16,8 +16,9 @@ import { buildRoom, FLOOR } from './room';
 // most of what you see of them is the glow they throw. Steam rises from a
 // mug on the table, dust drifts in the lamplight, the pothos sways.
 //
-// Click a lamp, the stairs, the sofa, the bed, the kitchen shelf or the
-// mezzanine's edge to switch its light, until its own hours next change.
+// Everything comes on at dusk and goes off at dawn. Click a lamp, the
+// stairs, the sofa, the bed, the kitchen shelf or the mezzanine's edge to
+// switch its light, until dusk or dawn next comes round.
 
 const MOTES = 70;
 

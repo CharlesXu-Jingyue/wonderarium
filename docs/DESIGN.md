@@ -334,11 +334,10 @@ tread below and a soft pool on the floor beneath the lower flight, with an area 
 under the mezzanine's edge and the kitchen shelf, as area lights down onto
 the bar, the desk and the counter; under the sofa and the
 bed, as light escaping round their bases. A desk lamp and the monitor (the
-one cool light among the warm) and a globe lamp by the bed, with a second
-on the bookshelf. Each fixture keeps its own hours: the strips from dusk to
-dawn, the desk from evening until half past eleven, the bedside lamp late
-evening until a little after midnight. Each comes on in its own moment and
-eases in and out.
+one cool light among the warm), a globe lamp by the bed, and a smaller
+globe on the bookshelf, each lamp with a soft glow of its own on the desk or
+the wall behind it. Every fixture comes on at dusk and goes off at dawn,
+each in its own moment, easing in and out.
 
 **Night:** the room's shared night light is never dark, which suits a pond
 but not a home after dark. The loft takes most of it back with a negative
@@ -350,7 +349,7 @@ the pothos sways.
 
 **Interaction:** a click on any fixture (lamps, the monitor, the stairs, the
 sofa, the bed, the kitchen shelf, the mezzanine's edge; the thin ones have
-larger invisible handles) switches it, until its own hours next change.
+larger invisible handles) switches it, until dusk or dawn next comes round.
 
 **Remembered:** nothing.
 

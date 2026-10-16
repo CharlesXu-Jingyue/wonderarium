@@ -13,8 +13,8 @@ import { FLOOR, LANDING_TOP, lowerSteps, MEZZ, RUN_UP, STAIRS, treads, WALL } fr
 //
 // Each fixture is a little bundle: real lights that light the furniture
 // round it, glowing surfaces where a bulb or a strip shows, and soft
-// painted glows where its light falls. It keeps its own hours, and a click
-// switches it until those hours next say otherwise.
+// painted glows where its light falls. It is on from dusk to dawn, and a
+// click switches it until dusk or dawn next comes round.
 
 const GLOW = new THREE.Color(L.glow);
 
@@ -260,8 +260,7 @@ export function buildLights(look: Look) {
 
   // ---------- the desk: a lamp, and the monitor ----------
   {
-    // Someone works late at the desk, and calls it a night before midnight.
-    const f = new Fixture('desk', (h, daylight) => h >= 17.5 && h < 23.5 && daylight < 0.7);
+    const f = new Fixture('desk', evening);
     const deskTop = FLOOR + 0.75 * 0.185;
     const x = -0.1;
     const z = WALL + 0.05;
@@ -278,7 +277,7 @@ export function buildLights(look: Look) {
     const lamp = f.light(new THREE.PointLight(GLOW, 0, 0.45, 2), 0.055);
     lamp.position.set(x - 0.035, deskTop + 0.06, z + 0.03);
     group.add(lamp);
-    const pool = f.wash(washMaterial('spot', GLOW), 0.3);
+    const pool = f.wash(washMaterial('spot', GLOW), 0.18);
     group.add(washMesh(pool, 0.12, 0.09, new THREE.Vector3(x - 0.05, deskTop + 0.0008, z + 0.01), new THREE.Vector3(0, 1, 0)));
     // The monitor, a little cool light among the warm.
     const screenX = -0.2;
@@ -295,8 +294,7 @@ export function buildLights(look: Look) {
 
   // ---------- the globe lamp by the bed, and one on the shelf ----------
   {
-    // On for reading in bed, out a little after midnight.
-    const f = new Fixture('bedside', (h, daylight) => daylight < 0.5 && (h >= 20.5 || h < 0.75));
+    const f = new Fixture('bedside', evening);
     const globeMat = f.glow(new THREE.MeshStandardMaterial({ color: L.shade, emissive: GLOW, emissiveIntensity: 0, roughness: 0.4 }), 1.7);
     const top = m.top;
     const nx = WALL + 0.04;
@@ -308,12 +306,27 @@ export function buildLights(look: Look) {
     const lamp = f.light(new THREE.PointLight(GLOW, 0, 0.55, 2), 0.085);
     lamp.position.set(nx + 0.02, top + 0.1, nz);
     group.add(lamp);
-    const shelfGlobe = mesh(new THREE.SphereGeometry(0.013, 8, 6), globeMat, [-0.15, BOOKSHELF.top + 0.013, WALL + BOOKSHELF.depth / 2]);
+    const glowOnWall = f.wash(washMaterial('spot', GLOW), 0.16);
+    group.add(washMesh(glowOnWall, 0.12, 0.12, new THREE.Vector3(WALL + 0.0015, top + 0.1, nz), new THREE.Vector3(1, 0, 0)));
+    f.handles.push(globe);
+    fixtures.push(f);
+  }
+
+  // ---------- the little globe on the bookshelf ----------
+  {
+    const f = new Fixture('shelf', evening);
+    const globeMat = f.glow(new THREE.MeshStandardMaterial({ color: L.shade, emissive: GLOW, emissiveIntensity: 0, roughness: 0.4 }), 1.5);
+    const at = new THREE.Vector3(-0.15, BOOKSHELF.top + 0.013, WALL + BOOKSHELF.depth / 2);
+    const shelfGlobe = mesh(new THREE.SphereGeometry(0.013, 8, 6), globeMat, at.toArray() as [number, number, number]);
     shelfGlobe.castShadow = false;
     group.add(shelfGlobe);
-    const glowOnWall = f.wash(washMaterial('spot', GLOW), 0.28);
-    group.add(washMesh(glowOnWall, 0.12, 0.12, new THREE.Vector3(WALL + 0.0015, top + 0.1, nz), new THREE.Vector3(1, 0, 0)));
-    f.handles.push(globe, shelfGlobe);
+    const lamp = f.light(new THREE.PointLight(GLOW, 0, 0.3, 2), 0.035);
+    lamp.position.set(at.x, at.y + 0.01, at.z + 0.02);
+    group.add(lamp);
+    // Its own soft glow on the wall behind it.
+    const glowOnWall = f.wash(washMaterial('spot', GLOW), 0.16);
+    group.add(washMesh(glowOnWall, 0.1, 0.1, new THREE.Vector3(at.x, at.y + 0.015, WALL + 0.0015), new THREE.Vector3(0, 0, 1)));
+    f.handles.push(shelfGlobe);
     fixtures.push(f);
   }
 
