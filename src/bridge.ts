@@ -17,6 +17,8 @@ export interface Bridge {
     setPinned(pinned: boolean): void;
     minimize(): void;
     close(): void;
+    /** Whether the cursor is over the window right now, wherever the page thinks it is. */
+    cursorInside(): Promise<boolean>;
   };
   screenshots: {
     /** Saves PNG bytes; resolves to the file name, or null. */
@@ -73,6 +75,9 @@ function browserBridge(): Bridge {
       },
       minimize() {},
       close() {},
+      // A browser tab has no drag regions, so when it hears the pointer
+      // leave, the pointer really has left.
+      cursorInside: async () => false,
     },
     screenshots: {
       async save(bytes) {

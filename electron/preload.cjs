@@ -18,6 +18,7 @@ contextBridge.exposeInMainWorld('bits', {
     setPinned: (pinned) => ipcRenderer.send('window:set-pinned', pinned),
     minimize: () => ipcRenderer.send('window:minimize'),
     close: () => ipcRenderer.send('window:close'),
+    cursorInside: () => ipcRenderer.invoke('window:cursor-inside'),
   },
   screenshots: {
     save: (bytes) => ipcRenderer.invoke('screenshot:save', bytes),

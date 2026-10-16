@@ -207,6 +207,14 @@ function registerIpc() {
   });
 
   ipcMain.on('window:minimize', () => win?.minimize());
+  // Over a drag region the page hears no pointer at all, just as if it had
+  // left the window; this tells it where the cursor really is.
+  ipcMain.handle('window:cursor-inside', () => {
+    if (!win) return false;
+    const p = screen.getCursorScreenPoint();
+    const b = win.getBounds();
+    return p.x >= b.x && p.x < b.x + b.width && p.y >= b.y && p.y < b.y + b.height;
+  });
   ipcMain.on('window:close', () => win?.close());
 
   // Screenshots are PNG bytes from the renderer, written into the data folder.

@@ -82,14 +82,29 @@ export class Chrome {
   // ---------- show on hover, fade when idle ----------
 
   private wireVisibility() {
+    let leaving = 0;
     const wake = () => {
+      window.clearTimeout(leaving);
       this.app.classList.add('awake');
       window.clearTimeout(this.hideTimer);
       this.hideTimer = window.setTimeout(() => this.sleep(), HIDE_AFTER_MS);
     };
+    // The page also hears the pointer "leave" when it moves onto a drag
+    // region (a bare part of a panel), where it hears nothing more. So ask
+    // the window: still inside, keep the controls up and ask again shortly;
+    // really gone, put them away.
+    const left = async () => {
+      window.clearTimeout(leaving);
+      if (await bridge.window.cursorInside()) {
+        window.clearTimeout(this.hideTimer);
+        leaving = window.setTimeout(left, 400);
+      } else {
+        this.sleep(true);
+      }
+    };
     document.addEventListener('pointermove', wake);
     document.addEventListener('pointerdown', wake);
-    document.documentElement.addEventListener('mouseleave', () => this.sleep(true));
+    document.documentElement.addEventListener('mouseleave', () => void left());
   }
 
   private anyPopoverOpen() {
