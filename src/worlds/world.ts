@@ -32,7 +32,11 @@ export interface World {
   readonly id: string;
   readonly name: string;
   mount(ctx: WorldContext, saved?: unknown): void;
-  /** Advance the simulation by a fixed step of real seconds. */
+  /**
+   * Advance the simulation by a fixed step of real seconds. A step of 0
+   * moves nothing but should bring light-dependent looks up to date (the
+   * shell does this around a card's picture, which is taken at midday).
+   */
   step(dt: number): void;
   /** Optional visual interpolation between steps (0..1). */
   render?(alpha: number): void;
@@ -40,6 +44,13 @@ export interface World {
   pointer?(event: WorldPointerEvent): boolean;
   /** CSS cursor the world would like over the cube right now ('' for default). */
   readonly cursor?: string;
+  /**
+   * A haze the world is seen through, like water: things fade toward
+   * `color` with distance, from `near` to `far` units past the cube's
+   * middle as seen from the camera (negative is nearer). The world may
+   * change the colour as it goes.
+   */
+  readonly haze?: { color: THREE.Color; near: number; far: number };
   serialize?(): unknown;
   dispose?(): void;
 }

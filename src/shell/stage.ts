@@ -16,6 +16,20 @@ const HOME_AZIMUTH = Math.PI / 4;
 const SNAP = { azimuth: HOME_AZIMUTH + 0.32, polar: 1.02, zoom: 0.86, hours: 13 };
 /** Where the glass cuts off anything that grows past it. */
 const WALL = 0.497;
+/**
+ * Along each edge: the glass rounds off with a radius of 0.03, so on the
+ * diagonal its edge is 0.47 + 0.03 / sqrt(2) out on both axes. A cut there,
+ * across the corner, keeps things inside the curve (|a| + |b| <= 0.983);
+ * like the walls, each plane keeps the side its normal faces away from.
+ */
+const EDGE_CUT = 0.983 / Math.SQRT2;
+/**
+ * And at each corner, where the glass rounds off as a little sphere about
+ * (0.47, 0.47, 0.47): its farthest reach along the diagonal is
+ * 0.47 * sqrt(3) + 0.03, so a cut just inside that keeps things inside the
+ * curve (|x| + |y| + |z| <= 1.455).
+ */
+const CORNER_CUT = 1.455 / Math.sqrt(3);
 
 export class Stage {
   readonly renderer: THREE.WebGLRenderer;
@@ -42,10 +56,25 @@ export class Stage {
   private readonly raycaster = new THREE.Raycaster();
   private readonly ndc = new THREE.Vector2();
   // Six planes facing inward: the cube is the edge of every world, so a tree
-  // too tall or a rock too wide is simply cut off at the glass.
+  // too tall or a rock too wide is simply cut off at the glass. The glass
+  // has rounded edges and corners, so twelve more planes, one along each
+  // edge, and eight across the corners, trim what would otherwise poke out
+  // past the curve.
   private readonly walls = [
-    [1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1],
-  ].map(([x, y, z]) => new THREE.Plane(new THREE.Vector3(x, y, z), WALL));
+    ...[[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]].map(
+      ([x, y, z]) => new THREE.Plane(new THREE.Vector3(x, y, z), WALL),
+    ),
+    ...[[0, 1], [0, 2], [1, 2]].flatMap(([a, b]) =>
+      [[1, 1], [1, -1], [-1, 1], [-1, -1]].map(([sa, sb]) => {
+        const n = new THREE.Vector3();
+        n.setComponent(a, sa).setComponent(b, sb).normalize();
+        return new THREE.Plane(n, EDGE_CUT);
+      }),
+    ),
+    ...[-1, 1].flatMap((sx) => [-1, 1].flatMap((sy) => [-1, 1].map((sz) =>
+      new THREE.Plane(new THREE.Vector3(sx, sy, sz).normalize(), CORNER_CUT),
+    ))),
+  ];
   private readonly walled = new WeakSet<THREE.Material>();
 
   constructor(private readonly canvas: HTMLCanvasElement) {
@@ -76,6 +105,16 @@ export class Stage {
     this.controls.autoRotateSpeed = 0.25;
     this.controls.addEventListener('start', () => this.wake());
 
+    this.scene.onBeforeRender = (_r, _s, camera) => {
+      const haze = this.world?.haze;
+      const fog = this.scene.fog;
+      if (!haze || !(fog instanceof THREE.Fog)) return;
+      const d = camera.position.distanceTo(this.controls.target);
+      fog.color.copy(haze.color);
+      fog.near = d + haze.near;
+      fog.far = d + haze.far;
+    };
+
     this.listenForPointer();
     new ResizeObserver(() => this.resize()).observe(canvas);
     this.resize();
@@ -83,6 +122,9 @@ export class Stage {
 
   setWorld(world: World | undefined) {
     this.world = world;
+    // A world seen through a haze gets fog, measured from whichever camera
+    // is drawing (the view, or the one that takes a card's picture).
+    this.scene.fog = world?.haze ? new THREE.Fog(world.haze.color) : null;
   }
 
   /** Glide the camera back to the starting three-quarter view. */
@@ -103,12 +145,16 @@ export class Stage {
     cam.lookAt(this.controls.target);
     this.lighting.update(SNAP.hours, SNAP.azimuth - HOME_AZIMUTH);
     this.cube.update(this.lighting.state);
+    // A still step, so the world's own colours (its water, its glow) follow
+    // the midday light too; no time passes.
+    this.world?.step(0);
     this.wallIn();
     const background = `#${this.lighting.backdrop.bottom.getHexString()}`;
     const out = this.capture({ width, height, scale: 0.92, background }, cam);
     // Back to the room as it is, and draw it so the snapshot never shows.
     this.lighting.update(this.lastLight.hours, this.lastLight.turn);
     this.cube.update(this.lighting.state);
+    this.world?.step(0);
     this.renderer.render(this.scene, this.camera);
     return out;
   }

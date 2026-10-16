@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { rand } from '../kit';
 import type { World, WorldContext, WorldPointerEvent } from '../world';
 import { advance, hue, onAttractor } from './flow';
-import { dotMaterial, glowUniforms, lineMaterial, trackPixels } from './glow';
+import { dotMaterial, glowUniforms, lineMaterial, trackPixels } from '../glow';
 
 // The abstract one: no floor and no creatures, only light in empty space.
 // Sparks run the Lorenz equations, each with a short comet's tail, over a

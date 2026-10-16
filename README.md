@@ -8,7 +8,7 @@ A small glass cube sits on your desktop, and inside it a tiny world goes about i
 
 The cube is only ever a boundary. It has no base or furniture of its own: whatever a world holds is inside the glass, and anything that grows past it (a tall pine, a wide rock) is simply cut off there, like a diorama. The design notes in [docs/DESIGN.md](docs/DESIGN.md) tell the longer story of how each world was made.
 
-## Three worlds, so far
+## Four worlds, so far
 
 **The hamster cage.** A wooden tray of shavings with a deep wheel, a plank cottage with an arched door and a round window, a water bottle, a food bowl, a chew log and a block of cheese. The hamster lives by a handful of needs that rise over time, so it eats, drinks, grooms, digs, wanders and runs when it feels like it, and it leans nocturnal: sleepy in the afternoon, keen on the wheel after dark. When it goes to bed it walks in through the door and disappears behind the wall, and at night the cottage windows glow.
 
@@ -40,6 +40,13 @@ Now and then a small spotted fawn steps in through the glass. It might go down t
 
 - **Gather a cloud.** Click near the sparks and three dozen of them leave wherever they were and gather, in cyan, onto the one you picked, close enough to look like a single bright spark. For a while they travel as one; then, somewhere between a few seconds and half a minute depending on where they started, they fray into a streak and scatter over both wings, keeping their colour until they are fully mixed back in. It is sensitive dependence on initial conditions, slowed down enough to watch.
 
+**The jellyfish tank.** An underwater fantasy, more about mood than marine biology. Deep blue water fills the tank right up to the lid, over pale lavender sand, with a great slate boulder towering in the back corner and smaller rocks around it, branching coral in pink, peach and lilac, ribbons of weed leaning in a slow current, and an old pot lying on its side. Light falls in soft shafts from the surface and throws a wandering net of caustics over the sand, bubbles rise now and then from the pot, and specks drift down through the blue. Six jellies, large and small, beat their way through it in slow pulses (a quick squeeze and a long, easy relaxing) and coast and sink between beats, each drifting toward a depth of its own choosing that changes every half minute or so. Their tentacles and frilled arms have a little weight: they stream behind on the way up and sink slowly to hang beneath whenever nothing pulls them. By day the tank is a deep, calm blue; at night it turns a dark, inky blue, the sand and rocks sink into dim shapes, and the jellies glow pink, violet and peach from within.
+
+![The jellyfish tank at night, the jellies glowing pink and violet over dark rocks and coral](docs/images/jellyfish-tank.jpg)
+
+- **Rouse one.** Click a jelly and it glows a little brighter and beats its way upward for a few quick pulses before settling back into its own pace.
+- **Make bubbles.** Click the sand and a string of bubbles rises from the spot.
+
 ## The box itself
 
 **Time follows yours.** The box keeps your local time, and one sun and moon serve every world: warm and low at dawn and dusk, soft lavender at night, never quite dark. Click the clock to shift it, speed it up (up to 600 times) to watch a day go by, or sync it back to real time. The light belongs to the room, not the cube, so as you turn the cube the shadows sweep across what is inside it.
@@ -51,7 +58,7 @@ Now and then a small spotted fawn steps in through the glass. It might go down t
 - round tools along the bottom: reset the view, pause, take a screenshot, and settings (keep the window on top, drift slowly when idle, open the screenshots folder);
 - a corner at the bottom right to resize.
 
-Drag any bare part of the controls (the pill, the panel, the space between the tools) to move the window. Drag anywhere on the cube to turn it and scroll to zoom. Left alone for a while, it drifts slowly round on its own. In fullscreen, and in the web version, the box sits on a backdrop in its world's own colours (warm wood for the hamster, green shade for the pond, deep slate for the attractor), and the backdrop follows the sky from day to night.
+Drag any bare part of the controls (the pill, the panel, the space between the tools) to move the window. Drag anywhere on the cube to turn it and scroll to zoom. Left alone for a while, it drifts slowly round on its own. In fullscreen, and in the web version, the box sits on a backdrop in its world's own colours (warm wood for the hamster, green shade for the pond, deep slate for the attractor, ocean blue for the tank), and the backdrop follows the sky from day to night.
 
 **Everything is remembered.** Which world you were looking at, where the furniture stands, how the hamster was feeling, where the lily pads drifted and the clock settings all carry over to next time.
 
@@ -121,7 +128,7 @@ The code is small and plainly laid out:
 
 - `electron/` is the main process: the window, a private `app://` file scheme, and the save file. The page never touches Node; it talks to the main process only through a small bridge.
 - `src/shell/` draws the cube, the light, the clock and the controls.
-- `src/worlds/` holds one folder per world, plus a few things they share: a low-poly kit, and a grid for finding paths around obstacles.
+- `src/worlds/` holds one folder per world, plus a few things they share: a low-poly kit, soft glowing dots and lines, and a grid for finding paths around obstacles.
 
 Each world gets its own group inside the cube, a read-only view of the clock and the light, and the pointer, and nothing else. Adding one is a new folder and a line in `src/worlds/index.ts`.
 

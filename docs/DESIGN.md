@@ -34,24 +34,31 @@ self-sustaining world inside. You watch it more than you play it.
 ## Shell
 
 - **Chrome.** Hidden until you hover. Then four things fade in: a Worlds panel on the left with a card per world, showing a still taken once, the first time the world is opened, from a fixed angle a little off the corner and a touch closer than the usual view, always in midday light; a pill at the top right with the sky icon, the box's time (click it for shift, speed and sync) and minimize, fullscreen and close; round tools along the bottom (reset view, pause, screenshot, settings); and a resize corner. Settings holds keep-on-top, drift-when-idle and the screenshots folder. Any bare part of the pill, the panel, the tools or a popover moves the window.
-- **Cube.** Only the boundary: faintly blue glass that looks thick at the edges (a soft bluish rim and a crisp highlight line), brighter at grazing angles (Fresnel), and it mirrors two sparse room lights (a tall window and a small warm lamp, fixed relative to the viewer), so reflections slide across the panes as the cube turns. It has no base or contents of its own, but it is the edge of every world: whatever grows past the glass (a tall pine, a wide rock) is cut off there, shadow and all, like a diorama. A soft contact shadow under it makes it seem to rest on the desktop.
+- **Cube.** Only the boundary: faintly blue glass that looks thick at the edges (a soft bluish rim and a crisp highlight line), brighter at grazing angles (Fresnel), and it mirrors two sparse room lights (a tall window and a small warm lamp, fixed relative to the viewer), so reflections slide across the panes as the cube turns. It has no base or contents of its own, but it is the edge of every world: whatever grows past the glass (a tall pine, a wide rock) is cut off there, shadow and all, like a diorama. Six planes cut at the panes, twelve more across the edges and eight across the corners, so nothing pokes out past the glass's rounded edges and corners either. A soft contact shadow under it makes it seem to rest on the desktop.
 - **Lighting.** A sun or moon light whose angle and colour follow the world clock: warm and low at dawn and dusk, lavender at night, never black. The light belongs to the room, not the cube: turning the cube turns it under a fixed light, so shadows sweep across the contents (only turning around the vertical axis counts; the cube never tips). A tiny warm glow from the hamster house at night is planned.
 - **Runtime.** Fixed-step simulation, decoupled from rendering. It keeps running
   when the window is unfocused and throttles or pauses when the window is hidden.
 
-### World interface (sketch)
+### World interface
+
+The full contract lives in `src/worlds/world.ts`; in short:
 
 ```ts
 interface World {
   id: string; name: string;
-  init(scene: THREE.Group, saved?: unknown): void;
-  step(dt: number, clock: WorldClock): void;   // fixed-step sim
-  render(alpha: number): void;                 // interpolate visuals
-  onPointer(e: WorldPointerEvent): void;       // click / drag / hover in cube space
-  serialize(): unknown;
-  controls?: ControlSpec[];                    // world-specific knobs
+  mount(ctx: WorldContext, saved?: unknown): void; // its own group, read-only clock and light
+  step(dt: number): void;          // fixed-step sim; a step of 0 only refreshes light-dependent looks
+  render?(alpha: number): void;    // interpolate visuals
+  pointer?(e: WorldPointerEvent): boolean; // hover, click, drag in cube space; true if used
+  cursor?: string;
+  haze?: { color; near; far };     // seen through water: fog measured from the camera
+  serialize?(): unknown;
+  dispose?(): void;
 }
 ```
+
+Each world also brings, in `src/worlds/index.ts`, a placeholder accent for
+its card and its own backdrop colours by day and by night.
 
 ## Palette (starting point)
 
@@ -226,6 +233,67 @@ than five minutes. A spark taken into a newer cloud leaves its old one.
 
 **Remembered:** nothing; it never needs to be.
 
+## Jellyfish tank (world #4)
+
+An underwater fantasy rather than a faithful aquarium: soft glows and
+serenity, after a reference of moon jellies over lavender sand.
+
+**The water:** the tank is filled right up under the lid, with just enough
+room for the swell to stay inside the glass, in a deep blue that turns
+dark and inky at night, for contrast with the glow. The body of water is the inside of a box drawn from
+within, shaded from a lighter blue under the surface to a deep one at the
+sand, so the far walls read as water rather than glass. Everything in it is
+seen through a haze (the shell's fog, measured from whichever camera is
+drawing, so it works for the view and for the card's picture alike): the
+far side of the tank fades toward blue, and at night the haze closes in.
+The surface heaves in slow overlapping swells, faint enough that from
+above you look down through it into the tank; five shafts of light lean
+down from it, each breathing brighter and dimmer on its own slow cycle and
+always turned to face the viewer; and a net of caustics wanders over the
+sand (an old shader trick: warp a point by sines a few times and measure
+how tightly the warped lines bunch).
+
+**The floor:** pale lavender sand in low dunes, rising toward the back walls
+and running right up to the glass, so big rocks the glass cuts off have no
+gap beside the sand to show their buried parts. A great slate-blue boulder,
+far bigger than the rest, towers in the back corner to make a landscape of
+the tank; the glass cuts it on both back walls, and like every rock there
+its cuts are closed with flat faces of stone (the same trick as the pond's,
+now shared). Smaller rocks gather round it and along the walls; branching coral (tapered limbs that
+fork two or three times, with rounded tips) in pink, peach and lilac; weed
+as frilled ribbons that lean more the higher they go, in one slow current;
+and an amphora on its side, half in the sand, its dark mouth to the view.
+The room's night light is never dark, so the tank dims its own floor at
+night to about two thirds of its daytime brightness (enough to read the
+shapes, dim enough that what glows stands out).
+
+**The jellies:** six, from large to small, each a translucent faceted bell
+with a warm core and a soft halo. They beat: a quick squeeze (the bell
+narrows and lengthens and drives itself along its axis), a long relaxing,
+and a rest, between which they coast and slowly sink. Each drifts toward
+a depth of its own, chosen afresh every half minute or so, beating when
+below it and resting when above; their headings wander, they lean over to
+swim along at their depth and stand upright to climb, and they keep clear
+of the glass, of each other, and of the great boulder, over which their
+tentacles drape rather than pass through. Tentacles (fine glowing lines) and four
+frilled arms are chains of points that each follow the one above, so they
+stream behind on the way up; they also have a little weight (the arms a
+touch more), so whenever nothing pulls them they sink slowly to hang
+beneath the bell. They glow
+brighter at night, and pulse brighter with each squeeze.
+
+**Life in the water:** strings of bubbles rise now and then from the pot
+and from a crack between the rocks, wobbling and swelling a little on the
+way up; fine specks drift down and start again under the surface.
+
+**Interactions:**
+- *Click a jelly:* it glows a little brighter and beats its way upward for
+  a few eager pulses, then settles back into its own pace. Hovering does
+  nothing but show a pointing hand.
+- *Click the sand:* a string of bubbles rises from the spot.
+
+**Remembered:** nothing; the jellies start afresh, spread out, each time.
+
 ## Later worlds (backlog)
 
-Aquarium · tiny island · tree house · solar system
+Tiny island · tree house · solar system

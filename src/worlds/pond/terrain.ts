@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js';
+import { capCuts, cutAt } from '../cut';
 import { paintFaces, pick, seeded, type Look } from '../kit';
 import { P } from './look';
 
@@ -139,7 +140,9 @@ export function buildTerrain(look: Look): THREE.Mesh {
 
   const ground = new THREE.Mesh(surface, look.mat('#FFFFFF', { vertexColors: true }));
   ground.receiveShadow = true;
-  const skirt = new THREE.Mesh(sides, look.mat('#FFFFFF', { vertexColors: true }));
+  // Two-sided, so where the glass's rounded corners trim the slab, the
+  // notch shows soil from within rather than a hole.
+  const skirt = new THREE.Mesh(sides, look.mat('#FFFFFF', { vertexColors: true, side: THREE.DoubleSide }));
   skirt.receiveShadow = true;
   ground.add(skirt);
   surface.computeVertexNormals();
@@ -204,13 +207,8 @@ export function buildStones(look: Look, specs: StoneSpec[]) {
 
 // ---------- stones cut at the edge ----------
 
-// Stones near a wall are cut off where the soil ends, not at the glass a few
-// millimetres further out: otherwise their buried bases would hang down past
-// the cut-away side of the slab. Each cut is then closed with a flat face of
-// stone, so the rock reads as solid rather than as a hollow shell.
-const SLAB_EDGES = [
-  [1, 0, 0], [-1, 0, 0], [0, 0, 1], [0, 0, -1],
-].map(([x, y, z]) => new THREE.Plane(new THREE.Vector3(x, y, z), EDGE));
+// Stones near a wall are cut off where the soil ends and closed with a flat
+// face of stone (see ../cut.ts).
 
 const stoneMaterials = new WeakMap<Look, THREE.MeshStandardMaterial>();
 
@@ -218,78 +216,15 @@ const stoneMaterials = new WeakMap<Look, THREE.MeshStandardMaterial>();
 export function stoneMaterial(look: Look) {
   let m = stoneMaterials.get(look);
   if (!m) {
-    m = look.mat('#FFFFFF', { vertexColors: true }).clone();
-    m.clippingPlanes = [...SLAB_EDGES];
+    m = cutAt(look.mat('#FFFFFF', { vertexColors: true }), EDGE);
     stoneMaterials.set(look, m);
   }
   return m;
 }
 
-/**
- * Flat faces over every place a stone in `stones` is cut by the slab's edge.
- * Each is the outline of the cut, filled in, and sits in the same plane as
- * the slab's side; drawn a touch behind it, so below the grass the soil
- * still shows and only the part standing above it is stone.
- */
+/** Flat faces of stone over every place a stone in `stones` is cut by the slab's edge. */
 export function edgeCaps(look: Look, stones: THREE.Group) {
-  const caps = new THREE.Group();
-  const material = look.mat(P.rock[3]).clone();
-  material.polygonOffset = true;
-  material.polygonOffsetFactor = 1;
-  material.polygonOffsetUnits = 2;
-  const tri = [new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()];
-  stones.updateMatrixWorld(true);
-  for (const stone of stones.children) {
-    if (!(stone instanceof THREE.Mesh)) continue;
-    const pos = stone.geometry.getAttribute('position');
-    for (const plane of SLAB_EDGES) {
-      // Where the stone's surface crosses the plane.
-      const cut: THREE.Vector3[] = [];
-      for (let i = 0; i < pos.count; i += 3) {
-        tri.forEach((v, k) => v.fromBufferAttribute(pos, i + k).applyMatrix4(stone.matrix));
-        for (let k = 0; k < 3; k++) {
-          const p = tri[k];
-          const q = tri[(k + 1) % 3];
-          const dp = plane.distanceToPoint(p);
-          const dq = plane.distanceToPoint(q);
-          if (dp < 0 !== dq < 0) cut.push(p.clone().lerp(q, dp / (dp - dq)));
-        }
-      }
-      if (cut.length < 3) continue;
-      const outline = hull(cut, plane.normal.x !== 0 ? 'z' : 'x');
-      const out = plane.normal.clone().negate();
-      const vertices: number[] = [];
-      for (let i = 1; i + 1 < outline.length; i++) {
-        const [a, b, c] = [outline[0], outline[i], outline[i + 1]];
-        const facing = new THREE.Vector3().subVectors(b, a).cross(new THREE.Vector3().subVectors(c, a)).dot(out);
-        for (const v of facing > 0 ? [a, b, c] : [a, c, b]) vertices.push(v.x, v.y, v.z);
-      }
-      const geometry = new THREE.BufferGeometry();
-      geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-      geometry.computeVertexNormals();
-      const cap = new THREE.Mesh(geometry, material);
-      cap.receiveShadow = true;
-      caps.add(cap);
-    }
-  }
-  return caps;
-}
-
-/** The convex outline of points lying in a wall plane, by height and `along`. */
-function hull(points: THREE.Vector3[], along: 'x' | 'z') {
-  const pts = [...points].sort((a, b) => a[along] - b[along] || a.y - b.y);
-  const cross = (o: THREE.Vector3, a: THREE.Vector3, b: THREE.Vector3) =>
-    (a[along] - o[along]) * (b.y - o.y) - (a.y - o.y) * (b[along] - o[along]);
-  const half = (list: THREE.Vector3[]) => {
-    const h: THREE.Vector3[] = [];
-    for (const p of list) {
-      while (h.length >= 2 && cross(h[h.length - 2], h[h.length - 1], p) <= 0) h.pop();
-      h.push(p);
-    }
-    h.pop();
-    return h;
-  };
-  return [...half(pts), ...half([...pts].reverse())];
+  return capCuts(stones, EDGE, look.mat(P.rock[3]));
 }
 
 /** Small pebbles scattered over the pond bed, seen through the water. */
